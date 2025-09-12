@@ -1,0 +1,86 @@
+graph TD
+    Player[Player]
+
+    subgraph "Sea Battle System"
+        UC1("Creat lobby")
+        UC2("Join via Link")
+        UC3("Game with AI")
+
+        UC4("Set board size")
+		UC5("Set fleet size")
+		UC6("Set first player")
+		UC8("Write name")
+		UC7("Comfrim settings")
+		UC9("quit to main menu")
+		UC10("ready to start")
+
+        UC11("Place Ships")
+        UC12("return ship placment")
+        UC13("return to lobby")
+		UC14("confirm readiness")
+
+        UC15("Make Move")
+		UC16("surrender")
+		UC17("winner screen")
+
+        UC18("look enemy board")
+		UC19("quit to lobby")
+
+
+
+		UC20("Write name")
+		UC21("quit to main menu")
+		UC22("ready to start")
+
+		UC23("Place Ships")
+        UC24("return ship placment")
+        UC25("return to lobby")
+		UC26("confirm readiness")
+
+		UC27("Make Move")
+		UC28("surrender")
+		UC29("winner screen")
+
+		UC30("look enemy board")
+		UC31("quit to lobby")
+    end
+	
+    Player --> UC1
+    Player --> UC2
+    Player --> UC3
+
+    UC1 --> UC4
+    UC1 --> UC5
+    UC1 --> UC6
+    UC1 --> UC7
+    UC1 --> UC8
+    UC1 --> UC9
+    UC1 ---> UC10
+
+	UC10 --> UC11
+	UC10 --> UC12
+	UC10 --> UC13
+	UC10 ---> UC14
+
+	UC14 --> UC15
+	UC14 --> UC16
+	UC14 ---> UC17
+
+	UC17 --> UC18
+	UC17 --> UC19
+
+	UC2 --> UC20
+	UC2 --> UC21
+	UC2 ---> UC22
+
+	UC22 --> UC23
+	UC22 --> UC24
+	UC22 --> UC25
+	UC22 ---> UC26
+
+	UC26 --> UC27
+	UC26 --> UC28
+	UC26 ---> UC29
+
+	UC29 --> UC30
+	UC29 --> UC31

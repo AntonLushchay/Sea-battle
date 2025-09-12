@@ -1,0 +1,472 @@
+---
+config:
+  theme: dark
+---
+classDiagram
+    direction TD
+
+    %% --- 1. WebSocket Layer (Шлюз) ---
+	class IWebSocketGateway {
+        <<Interface>>
+        + handleCreateGame(socket): GameCreatedPayload
+        + handleJoinGame(socket, payload: JoinGamePayload): GameStateUpdatePayload
+        + handleUpdateSettings(socket, payload: UpdateSettingsPayload): GameStateUpdatePayload
+        + handlePlaceShip(socket, payload: PlaceShipPayload): GameStateUpdatePayload
+        + handleUnplaceShip(socket, payload: UnplaceShipPayload): GameStateUpdatePayload
+        + handlePlayerReady(socket): GameStateUpdatePayload
+        + handleMakeTurn(socket, payload: MakeTurnPayload): TurnResultPayload
+        + handleSurrender(socket): GameStateUpdatePayload
+        + handleReturnToLobby(socket): void
+        + handleDestroyLobby(socket): void
+    }
+
+    class WebSocketGateway {
+		<<Class>>
+        - gameService: IGameService
+        + handleCreateGame(socket): GameCreatedPayload
+        + handleJoinGame(socket, payload: JoinGamePayload): GameStateUpdatePayload
+        + handleUpdateSettings(socket, payload: UpdateSettingsPayload): GameStateUpdatePayload
+        + handlePlaceShip(socket, payload: PlaceShipPayload): GameStateUpdatePayload
+        + handleUnplaceShip(socket, payload: UnplaceShipPayload): GameStateUpdatePayload
+		+ handlePlayerReady(socket): GameStateUpdatePayload
+        + handleMakeTurn(socket, payload: MakeTurnPayload): TurnResultPayload
+        + handleSurrender(socket): GameStateUpdatePayload
+        + handleReturnToLobby(socket): void
+        + handleDestroyLobby(socket): void
+		- broadcastToPlayers(gameState: GameStatePayload): void
+    }
+
+    %% --- 2. Service Layer (Мозг) ---
+    class IGameService {
+        <<Interface>>
+        + createNewGame(socket): GameCreatedPayload
+        + joinGame(socket, payload: JoinGamePayload): GameStateUpdatePayload
+        + updateSettings(socket, payload: UpdateSettingsPayload): GameStateUpdatePayload
+        + placeShip(socket, payload: PlaceShipPayload): GameStateUpdatePayload
+        + unplaceShip(socket, payload: UnplaceShipPayload): GameStateUpdatePayload
+        + playerReady(socket): GameStateUpdatePayload
+        + makeTurn(socket, payload: MakeTurnPayload): TurnResultPayload
+        + surrender(socket): GameOverPayload
+		+ destroyLobby(socket): void
+    }
+
+    class GameService {
+		<<Class>>
+        - gameRepository: IGameRepository
+		- game: IGame
+        + createNewGame(socket): GameCreatedPayload
+        + joinGame(socket, payload: JoinGamePayload): GameStateUpdatePayload
+        + updateSettings(socket, payload: UpdateSettingsPayload): GameStateUpdatePayload
+        + placeShip(socket, payload: PlaceShipPayload) : GameStateUpdatePayload
+        + unplaceShip(socket, payload: UnplaceShipPayload) : GameStateUpdatePayload
+        + playerReady(socket) : GameStateUpdatePayload
+		+ makeTurn(socket, payload: MakeTurnPayload) : TurnResultPayload
+		+ surrender(socket) : GameOverPayload
+		+ destroyLobby(socket) : void
+    }
+
+    %% --- 3. Data Layer (Память) ---
+	class IGameRepository {
+		<<Interface>>
+        + save(game: IGames): void
+        + findById(gameId: string) : IGame | undefined
+        + delete(gameId: string) : void
+    }
+
+    class GameRepository {
+		<<Class>>
+        - Map~string, Game~
+        + save(game: IGames): void
+        + findById(gameId: string) : IGame | undefined
+        + delete(gameId: string) : void
+    }
+
+    %% --- 4. Core Models (ООП-Ядро) ---
+	namespace ICore {
+		class IGame {
+			<<Interface>>
+			+ addPlayer(name: string): IPlayer
+			+ getPlayer(playerId: string): IPlayer
+			+ isHost(playerId: string): bool
+			+ updateSettings(playerId: string, settings: UpdateSettingsPayload): void 
+			+ placeShip(playerId: string, placement: PlaceShipPayload): void
+			+ unplaceShip(playerId: string, payload: UnplaceShipPayload): void
+			+ playerReady(playerId: string): void
+			+ processTurn(playerId: string, coords: CoordsDTO): void
+		}
+
+		class IPlayer {
+			<<Interface>>
+			+ getId(): string
+			+ getName(): string
+			+ isReady(): boolean
+			+ setReadyStatus(isReady: boolean): void
+			+ getBoard(): IBoard
+			+ getFleet(): IFleet
+			+ setName(name: string): void
+			+ rebuildBoard: (size: number): IBoad
+			+ regenerateFleet(config: FleetRuleDTO[]): void
+			+ placeShip(payload: PlaceShipPayload): void
+			+ unplaceShip(payload: UnplaceShipPayload): void
+			+ receiveShot(coords: CoordsDTO): ShotResult
+    	}
+
+		class IBoard {
+			<<Interface>>
+			+ getCell(x: number, y: number): ICell
+			+ validatePlacement(ship: IShip): bool
+		}
+
+		class IFleet {
+			<<Interface>>
+			+ getShipById(shipId: string): IShip
+			+ areAllShipsSunk(): bool
+    	}
+
+		class IShip {
+			<<Interface>>
+			+ getId(): string
+			+ getType(): string
+			+ getSize(): number
+			+ getHits(): number
+			+ isSunk(): boolean
+			+ isPlaced(): boolean
+			+ recordHit(): void
+			+ setPosition(coords: CoordsDTO[]): void
+    	}
+
+		class ICell {
+			<<Interface>>
+			+ getStatus(): cellStatus
+			+ getShipReference(): IShip | null
+			+ isOccupied(): boolean
+			+ setShip(ship: IShip): void
+			+ clearShip(): void
+			+ receiveShot(): ShotResult
+    	}
+	}
+
+	namespace Core {
+		class Game {
+			<<Class>>
+			- gameId: string
+			- players: IPlayer[]
+			- status: 'SETUP' | 'IN_PROGRESS' | 'FINISHED'
+			- currentPlayerId: string
+			- FleetConfig: FleetRuleDTO[]
+			+ addPlayer(name: string): IPlayer
+			+ getPlayer(playerId: string): IPlayer
+			+ isHost(playerId: string): bool
+			+ pdateSettings(playerId: string, settings: UpdateSettingsPayload): void 
+			+ placeShip(playerId: string, placement: PlaceShipPayload): void
+    	    + unplaceShip(playerId: string, payload: UnplaceShipPayload): void
+        	+ playerReady(playerId: string): void
+        	+ processTurn(playerId: string, coords: CoordsDTO): void
+    		- switchTurn(): void
+		}
+		
+		class Player {
+			- playerId: string
+			- name: string
+			- isReady: boolean
+			- board: IBoard
+			- fleet: IFleet
+			+ getId(): string
+			+ getName(): string
+			+ isReady(): boolean
+			+ getBoard(): IBoard
+			+ getFleet(): IFleet
+			+ setName(name: string): void
+			+ rebuildBoard: (size: number): IBoad
+			+ regenerateFleet(config: FleetRuleDTO[]): void
+			+ placeShip(payload: PlaceShipPayload): void
+			+ unplaceShip(payload: UnplaceShipPayload): void
+			+ receiveShot(coords: CoordsDTO): void
+    	}
+		
+		class Board { 
+			<<Class>>
+			- grid: ICell[][]
+			- size: number
+			+ getCell(x: number, y: number): ICell
+			+ validatePlacement(ship: IShip): bool
+		}
+		
+		class Fleet {
+			<<Class>>
+			- ships: IShip[]
+			+ getShipById(shipId: string): IShip
+			+ areAllShipsSunk(): bool
+		}
+
+		class Ship {
+			<<Class>>
+			- id: string
+			- type: string
+			+ getId(): string
+			+ getType(): string
+			+ getSize(): number
+			+ getHits(): number
+			+ isSunk(): boolean
+			+ isPlaced(): boolean
+			+ recordHit(): void
+			+ setPosition(coords: CoordsDTO[]): void
+		}
+
+		class Cell {
+			<<Class>>
+			- status: CellStatus
+			- shipReference: IShip
+			+ getStatus(): CellStatus
+			+ getShipReference(): IShip | null
+			+ isOccupied(): boolean
+			+ setShip(ship: IShip): void
+			+ clearShip(): void
+			+ receiveShot(): ShotResult
+		}
+	}
+
+    %% --- 5. Shared Contract: C2S Payloads (Клиент -> Сервер) ---
+	namespace C2S Payloads {
+		class CreateGamePayload {
+			<<Interface>>
+		}
+
+		class JoinGamePayload {
+			<<Interface>>
+			+ gameId: string
+		}
+
+		class UpdateSettingsPayload {
+			<<Interface>>
+			+ playerName?: string;
+			+ boardSize?: number;
+			+ fleetConfig?: FleetRuleDTO[]
+			+ firstPlayer?: TurnOrder
+		}
+
+		class PlaceShipPayload {
+			<<Interface>>
+			+ placedShip: ShipPlacementDTO;
+		}
+
+		class UnplaceShipPayload {
+			<<Interface>>
+			+ shipID: string
+		}
+
+		class PlayerReadyPayload {
+			<<Interface>>
+		}
+
+		class MakeTurnPayload {
+			<<Interface>>
+			coords: CoordsDTO
+		}
+
+		class SurrenderPayload {
+			<<Interface>>
+		}
+
+		class DestroyLobbyPayload {
+			<<Interface>>
+		}
+
+	}
+
+	class TurnOrder {
+		<<Type>>
+		TurnOrder('PLAYER_1' | 'PLAYER_2' | 'RANDOM');
+	}
+
+    %% --- 6. Shared Contract: S2C Payloads (Сервер -> Клиент) ---
+	namespace S2C Payloads {
+		class GameCreatedPayload {
+			<<Interface>>
+			+ gameState: GameStateDTO
+		}
+
+		class GameStateUpdatePayload {
+			<<Interface>>
+			+ gameState: GameStateDTO
+		}
+
+		class TurnResultPayload {
+			<<Interface>>
+			+ coord: CoordsDTO;
+			+ result: 'HIT' | 'MISS' | 'SUNK';
+			+ newGameState: GameStateDTO;
+		}
+
+		class GameOverPayload {
+			<<Interface>>
+			+ winnerId: string
+		}
+
+		class ErrorPayload {
+			<<Interface>>
+			+ message: string
+		}
+	}
+
+    %% --- 7. Shared Contract: DTOs (Сущности данных) ---
+	namespace DTOs {
+		class  GameStateDTO { 
+			<<Interface>>
+			gameId: string;
+			myPlayerId: string;  
+			players: PlayerInfoDTO[];  
+			myBoard: BoardDTO;
+			enemyBoard: BoardDTO;
+			myFleet: FleetDTO;
+			currentPlayerId: string;
+			gameStatus: 'SETUP' | 'IN_PROGRESS' | 'FINISHED';
+		}
+		
+		class PlayerInfoDTO {
+			<<Interface>>
+			+ playerID
+			+ name: string;
+			+ isReady: bool
+		}
+		
+		class BoardDTO {
+			<<Interface>>
+			+ size: number
+			+ cells: CellDTO[][]
+		}
+
+		class FleetDTO {
+			<<Interface>>
+			ships: ShipDTO[]
+		}
+
+		class FleetRuleDTO {
+			<<Interface>>
+			baseInfo: ShipBaseDTO
+			count: number
+		}
+
+		class ShipPlacementDTO {
+			<<Interface>>
+			baseInfo: shipBaseDTO
+			coords: CoordsDTO[]
+			orientation: string
+		}
+
+		class ShipDTO {
+			<<Interface>>
+			baseInfo: shipBaseDTO
+			hitsCount: number
+			isSunk: bool
+			isPlaced: bool
+		}
+
+		class ShipBaseDTO {
+			<<Interface>>
+			shipID: string
+			type: string
+			size: number
+		}
+
+		class CellDTO {
+			<<Interface>>
+			coords: CoordsDTO
+			+ status: CellStatus
+		}
+		
+		class CoordsDTO {
+			<<Interface>>
+			x: number
+			y: number
+		}
+	}
+	
+	class cellStatus {
+			<<Type>>
+			CellStatus(EMPTY, SHIP, HIT, MISS)
+		}
+
+
+
+    %% --- Связи ---
+    %% Архитектурные слои
+	IWebSocketGateway <|.. WebSocketGateway
+	IGameService <|.. GameService
+	IGameRepository <|.. GameRepository
+	IGameRepository <.. IGame
+	IGame <|.. Game
+	IGame ..> IPlayer : returns
+	IPlayer ..> IBoard : returns
+	IPlayer ..> IFleet : returns
+	IPlayer <|.. Player
+	IBoard <|.. Board
+	IFleet <|.. Fleet
+	IFleet ..> IShip
+	IShip <|.. Ship
+	ICell <|.. Cell
+	ICell o-- cellStatus
+
+    WebSocketGateway ..> GameService : uses
+	WebSocketGateway ..> IGameService
+    GameService ..> GameRepository : uses
+    GameService ..> IGameRepository
+    GameService ..> IGame
+    GameRepository "1" o-- "0..*" Game : stores
+    GameRepository ..> IGame
+	Game ..> IPlayer
+	Player ..> IBoard
+	Player ..> IFleet
+	Fleet ..> IShip
+	Board ..> ICell
+	Cell o-- cellStatus
+
+    %% Внутренние модели (Композиция)
+    Game "1" *-- "2" Player : owns
+    Player "1" *-- "1" Board : owns
+    Player "1" *-- "1" Fleet : owns
+    Fleet "1" *-- "*" Ship : composed of
+    Board "1" *-- "*" Cell : composed of
+    Cell "1" --> "0..1" Ship : references
+    
+    %% Связи с Контрактом (C2S)
+    WebSocketGateway ..> CreateGamePayload : uses (receives)
+    WebSocketGateway ..> JoinGamePayload : uses (receives)
+    WebSocketGateway ..> UpdateSettingsPayload : uses (receives)
+    WebSocketGateway ..> PlaceShipPayload : uses (receives)
+    WebSocketGateway ..> UnplaceShipPayload : uses (receives)
+    WebSocketGateway ..> PlayerReadyPayload : uses (receives)
+    WebSocketGateway ..> MakeTurnPayload : uses (receives)
+    WebSocketGateway ..> SurrenderPayload : uses (receives)
+    WebSocketGateway ..> DestroyLobbyPayload : uses (receives)
+	
+
+    %% Связи с Контрактом (S2C)
+    GameService ..> GameCreatedPayload : uses (creates)
+    GameService ..> GameStateUpdatePayload : uses (creates)
+    GameService ..> TurnResultPayload : uses (creates)
+    GameService ..> GameOverPayload : uses (creates)
+    GameService ..> ErrorPayload : uses (creates)
+	MakeTurnPayload <|-- CoordsDTO
+
+    %% Структура DTO (Агрегация)
+	UpdateSettingsPayload o-- FleetRuleDTO
+	UpdateSettingsPayload o-- TurnOrder
+	PlaceShipPayload o-- ShipPlacementDTO
+	UnplaceShipPayload o-- ShipPlacementDTO
+
+    GameCreatedPayload o-- GameStateDTO
+    GameStateUpdatePayload o-- GameStateDTO
+	TurnResultPayload o-- GameStateDTO
+    TurnResultPayload o-- CoordsDTO
+    GameStateDTO o-- PlayerInfoDTO
+    GameStateDTO o-- BoardDTO
+    GameStateDTO o-- FleetDTO
+    BoardDTO *-- CellDTO
+	FleetDTO *-- ShipDTO
+	ShipBaseDTO <|-- ShipDTO
+	ShipBaseDTO <.. FleetRuleDTO : Except shipID
+	ShipBaseDTO <|-- ShipPlacementDTO
+	ShipPlacementDTO <|-- CoordsDTO
+	CellDTO o-- cellStatus
+	CellDTO *-- CoordsDTO

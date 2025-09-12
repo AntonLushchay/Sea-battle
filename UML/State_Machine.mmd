@@ -1,0 +1,15 @@
+stateDiagram-v2
+    direction LR
+    [*] --> AWAITING_OPPONENT: createGame
+    
+    AWAITING_OPPONENT --> SETUP: playerJoined
+    
+    SETUP --> READY_P1: player1Ready
+    SETUP --> READY_P2: player2Ready
+    READY_P1 --> IN_PROGRESS: player2Ready
+    READY_P2 --> IN_PROGRESS: player1Ready
+    
+    IN_PROGRESS --> IN_PROGRESS: makeTurn
+    IN_PROGRESS --> FINISHED: allShipsSunk
+    
+    FINISHED --> [*]: destroyGame
