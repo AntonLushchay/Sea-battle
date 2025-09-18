@@ -10,7 +10,7 @@ export default {
 		'color-named': 'never', // Запрет именованных цветов (red, blue)
 
 		// Единицы измерения
-		'unit-allowed-list': ['px', 'em', 'rem', '%', 'vh', 'vw', 's', 'ms'], // Разрешенные единицы
+		'unit-allowed-list': ['px', 'em', 'rem', '%', 'vh', 'vw', 's', 'ms', 'fr'], // Добавили 'fr' для CSS Grid
 		'length-zero-no-unit': true, // 0 без единиц (0px -> 0)
 
 		// Селекторы
@@ -36,5 +36,6 @@ export default {
 		// Предупреждения вместо ошибок
 		// 'declaration-no-important': 'warn', // Предупреждение о !important
 	},
-	ignoreFiles: ['node_modules/**/*', 'dist/**/*', 'public/**/*'],
+	files: ['packages/client/**/*.{scss,css}'],
+	ignoreFiles: ['**/dist/**', '**/build/**', '**/node_modules/**'],
 };

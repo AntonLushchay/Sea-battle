@@ -3,17 +3,24 @@
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
+	"workspaces": [
+		"packages/*"
+	],
 	"scripts": {
-		"dev": "vite",
-		"build": "tsc && vite build",
-		"preview": "vite preview",
+		"dev": "run-p dev:client dev:server",
+		"build": "npm run build --workspace=@sea-battle/shared && npm run build --workspace=@sea-battle/client",
+		"preview": "npm run preview --workspace=@sea-battle/client",
+		"dev:client": "npm run dev --workspace=@sea-battle/client",
+		"build:client": "npm run build --workspace=@sea-battle/client",
+		"preview:client": "npm run preview --workspace=@sea-battle/client",
+		"dev:server": "npm run dev --workspace=@sea-battle/server",
+		"build:server": "npm run build --workspace=@sea-battle/server",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"lint": "eslint src/ --ext .ts,.js",
-		"lint:fix": "eslint src/ --ext .ts,.js --fix",
-		"lint:check": "eslint src/ --ext .ts,.js --max-warnings 0",
-		"stylelint": "stylelint src/**/*.{css,scss,sass}",
-		"stylelint:fix": "stylelint src/**/*.{css,scss,sass} --fix",
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
+		"stylelint": "stylelint packages/**/*.{css,scss,sass}",
+		"stylelint:fix": "stylelint packages/**/*.{css,scss,sass} --fix",
 		"lint:all": "npm run lint && npm run stylelint"
 	},
 	"devDependencies": {
@@ -32,6 +39,7 @@
 		"globals": "^16.4.0",
 		"htmlhint": "^1.7.0",
 		"jiti": "^2.5.1",
+		"npm-run-all": "^4.1.5",
 		"prettier": "^3.6.2",
 		"sass": "^1.92.1",
 		"stylelint": "^16.24.0",
@@ -40,6 +48,7 @@
 		"stylelint-scss": "^6.12.1",
 		"typescript": "~5.8.3",
 		"typescript-eslint": "^8.43.0",
-		"vite": "^7.1.2"
+		"vite": "^7.1.2",
+		"tsx": "^4.19.1"
 	}
 }

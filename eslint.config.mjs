@@ -11,10 +11,10 @@ import promisePlugin from 'eslint-plugin-promise';
 
 export default [
 	{
-		ignores: ['public/**/*', 'node_modules/**/*', '*.mjs'],
+		ignores: ['**/dist/**', '**/build/**', '**/node_modules/**', '**/*.config.{js,ts}/**'],
 	},
 	{
-		files: ['**/*.{js,ts}'],
+		files: ['packages/**/*.{ts,js}'],
 		plugins: {
 			import: importPlugin,
 			prettier: prettierPlugin,
@@ -26,7 +26,7 @@ export default [
 		languageOptions: {
 			parser: typescriptParser,
 			parserOptions: {
-				project: './tsconfig.json', // Важно для правил, требующих инфо о типах
+				project: ['packages/*/tsconfig.json'], // Массив для monorepo
 			},
 			globals: {
 				...globals.browser,
@@ -148,7 +148,7 @@ export default [
 			'import/resolver': {
 				typescript: {
 					alwaysTryTypes: true,
-					project: './tsconfig.json',
+					project: ['packages/*/tsconfig.json'], // Массив для monorepo
 				},
 				node: true,
 			},
@@ -157,6 +157,22 @@ export default [
 			},
 		},
 	},
+	// Спец-блок для конфигов без typed-linting
+	// {
+	// 	files: ['**/*config.{js,ts,mjs}', 'scripts/**/*.{js,ts,mjs}'],
+	// 	languageOptions: {
+	// 		parser: typescriptParser,
+	// 		parserOptions: {
+	// 			project: null, // Отключаем typed-linting для конфигов
+	// 		},
+	// 	},
+	// 	rules: {
+	// 		// Базовые правила без TypeScript strict
+	// 		...js.configs.recommended.rules,
+	// 		'prefer-const': 'error',
+	// 		'no-console': 'warn',
+	// 	},
+	// },
 	// Конфигурация Prettier должна идти последней
 	prettierConfig,
 ];

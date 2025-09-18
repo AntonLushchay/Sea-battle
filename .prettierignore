@@ -2,6 +2,7 @@
 node_modules
 
 # Сборки
+build
 dist
 .vite
 

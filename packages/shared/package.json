@@ -1,0 +1,20 @@
+{
+	"name": "@sea-battle/shared",
+	"version": "1.0.0",
+	"type": "module",
+	"main": "src/index.ts",
+	"types": "dist/types/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/types/index.d.ts",
+			"default": "./src/index.ts"
+		}
+	},
+	"scripts": {
+		"build": "tsc"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"description": "Shared types and utilities for Sea Battle game"
+}
