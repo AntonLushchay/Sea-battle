@@ -8,7 +8,7 @@
 	],
 	"scripts": {
 		"dev": "run-p dev:client dev:server",
-		"build": "npm run build --workspace=@sea-battle/shared && npm run build --workspace=@sea-battle/client",
+		"build": "npm run build --workspace=@sea-battle/shared && npm run build --workspace=@sea-battle/client && npm run build --workspace=@sea-battle/server",
 		"preview": "npm run preview --workspace=@sea-battle/client",
 		"dev:client": "npm run dev --workspace=@sea-battle/client",
 		"build:client": "npm run build --workspace=@sea-battle/client",
