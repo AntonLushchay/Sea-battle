@@ -11,7 +11,7 @@ import promisePlugin from 'eslint-plugin-promise';
 
 export default [
 	{
-		ignores: ['**/dist/**', '**/build/**', '**/node_modules/**', '**/*.config.{js,ts}/**'],
+		ignores: ['**/dist/**', '**/build/**', '**/node_modules/**'],
 	},
 	{
 		files: ['packages/**/*.{ts,js}'],
@@ -158,21 +158,36 @@ export default [
 		},
 	},
 	// Спец-блок для конфигов без typed-linting
-	// {
-	// 	files: ['**/*config.{js,ts,mjs}', 'scripts/**/*.{js,ts,mjs}'],
-	// 	languageOptions: {
-	// 		parser: typescriptParser,
-	// 		parserOptions: {
-	// 			project: null, // Отключаем typed-linting для конфигов
-	// 		},
-	// 	},
-	// 	rules: {
-	// 		// Базовые правила без TypeScript strict
-	// 		...js.configs.recommended.rules,
-	// 		'prefer-const': 'error',
-	// 		'no-console': 'warn',
-	// 	},
-	// },
+	{
+		files: ['**/*config*.{js,ts,mjs}'],
+		plugins: {
+			import: importPlugin,
+			prettier: prettierPlugin,
+			'@typescript-eslint': typescriptPlugin,
+		},
+		languageOptions: {
+			parser: typescriptParser,
+			parserOptions: {
+				project: null, // Отключаем typed-linting для конфигов
+			},
+			globals: {
+				...globals.node,
+			},
+		},
+		rules: {
+			...js.configs.recommended.rules,
+			...typescriptPlugin.configs['recommended'].rules,
+			'prettier/prettier': 'error',
+			'prefer-const': 'error',
+			'no-console': 'warn',
+			// Отключаем правила, требующие информации о типах
+			'@typescript-eslint/no-unsafe-assignment': 'off',
+			'@typescript-eslint/no-unsafe-call': 'off',
+			'@typescript-eslint/no-unsafe-member-access': 'off',
+			'@typescript-eslint/no-floating-promises': 'off',
+			'@typescript-eslint/no-unsafe-argument': 'off',
+		},
+	},
 	// Конфигурация Prettier должна идти последней
 	prettierConfig,
 ];

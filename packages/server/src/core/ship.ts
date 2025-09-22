@@ -7,6 +7,7 @@ export interface IShip {
 	getHits(): number;
 	isSunk(): boolean;
 	isPlaced(): boolean;
+	getPosition(): CoordsDTO[];
 	recordHit(): void;
 	setPosition(coords: CoordsDTO[]): void;
 }
@@ -46,6 +47,10 @@ export class Ship implements IShip {
 
 	public isPlaced(): boolean {
 		return this.position.length > 0;
+	}
+
+	public getPosition(): CoordsDTO[] {
+		return this.position;
 	}
 
 	public recordHit(): void {

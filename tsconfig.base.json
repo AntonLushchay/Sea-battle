@@ -1,35 +1,56 @@
 {
 	"compilerOptions": {
+		// Устанавливает базовую директорию для разрешения не-относительных импортов.
+		// Вместе с "paths" позволяет использовать короткие пути.
 		"baseUrl": ".",
+
+		// Создает псевдонимы (aliases) для путей. Упрощает импорты.
+		// Например, вместо "../../../shared/src" можно писать "@sea-battle/shared".
 		"paths": {
 			"@/*": ["src/*"],
 			"@sea-battle/shared": ["packages/shared/src/index.ts"]
 		},
 
+		// Указывает, в какую версию JavaScript компилировать код. ES2022 - современный стандарт.
 		"target": "ES2022",
-		"useDefineForClassFields": true,
-		"module": "ESNext",
-		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+
+		// Пропускает проверку типов в файлах объявлений (.d.ts) из node_modules. Ускоряет компиляцию.
 		"skipLibCheck": true,
 
-		/* Bundler mode */
-		"moduleResolution": "bundler",
-		"allowImportingTsExtensions": true,
-		"verbatimModuleSyntax": true,
-		"moduleDetection": "force",
-		"noEmit": true,
+		// Обеспечивает совместимость между разными типами модулей (CommonJS и ES Modules).
+		// Позволяет делать `import React from 'react'` вместо `import * as React from 'react'`.
 		"esModuleInterop": true,
+
+		// Дополняет esModuleInterop, разрешая "синтетические" дефолтные импорты, когда у модуля нет явного дефолтного экспорта.
 		"allowSyntheticDefaultImports": true,
 
-		/* Linting */
+		// Включает все строгие проверки типов (null checks, implicit any и т.д.). Крайне рекомендуется для надежности кода.
 		"strict": true,
+
+		// Сообщает об ошибке, если есть неиспользуемые локальные переменные.
 		"noUnusedLocals": true,
+
+		// Сообщает об ошибке, если есть неиспользуемые параметры в функциях.
 		"noUnusedParameters": true,
+
+		// Примечание: это редкая или устаревшая опция. Современный аналог - `verbatimModuleSyntax`.
+		// Гарантирует, что импорты/экспорты без `type` не будут удалены при компиляции, если они используются только для типов.
 		"erasableSyntaxOnly": true,
+
+		// Запрещает "проваливание" из одного case в другой в switch-конструкциях без `break` или `return`.
 		"noFallthroughCasesInSwitch": true,
+
+		// Флаг, который помогает выявлять ошибки в импортах, содержащих только побочные эффекты, особенно если они ошибочны или опечатаны.
 		"noUncheckedSideEffectImports": true,
+
+		// Требует, чтобы при переопределении метода из родительского класса использовалось ключевое слово `override`.
 		"noImplicitOverride": true,
+
+		// Добавляет `| undefined` к типам при доступе к элементам массива или объекта по индексу/ключу.
+		// Заставляет проверять, что элемент действительно существует, прежде чем его использовать.
 		"noUncheckedIndexedAccess": true,
+
+		// Запрещает присваивать `undefined` опциональным свойствам. Помогает избежать путаницы между отсутствующим свойством и свойством со значением `undefined`.
 		"exactOptionalPropertyTypes": true
 	}
 }

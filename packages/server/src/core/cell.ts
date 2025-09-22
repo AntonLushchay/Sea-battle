@@ -1,4 +1,5 @@
 import type { CellStatus, CoordsDTO, ShotResult } from '@sea-battle/shared';
+
 import type { IShip } from './ship';
 
 export interface ICell {

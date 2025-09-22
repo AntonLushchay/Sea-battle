@@ -11,6 +11,6 @@
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
-		"@sea-battle/shared": "*"
+		"@sea-battle/shared": "workspace:*"
 	}
 }
