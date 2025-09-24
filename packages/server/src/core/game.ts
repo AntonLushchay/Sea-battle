@@ -16,10 +16,10 @@ import { Player, type IPlayer } from './player';
 // Default game settings
 const DEFAULT_BOARD_SIZE = 10;
 const DEFAULT_FLEET_RULES: FleetRuleDTO[] = [
-	{ baseInfo: { type: 'carrier', size: 5 }, count: 1 },
-	{ baseInfo: { type: 'battleship', size: 4 }, count: 1 },
-	{ baseInfo: { type: 'cruiser', size: 3 }, count: 2 },
-	{ baseInfo: { type: 'destroyer', size: 2 }, count: 2 },
+	{ type: 'carrier', size: 4, count: 1 },
+	{ type: 'battleship', size: 3, count: 2 },
+	{ type: 'cruiser', size: 2, count: 3 },
+	{ type: 'destroyer', size: 1, count: 4 },
 ];
 const MAX_PLAYERS = 2;
 

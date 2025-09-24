@@ -78,8 +78,8 @@ export class Player implements IPlayer {
 		rules.forEach((rule) => {
 			for (let i = 0; i < rule.count; i++) {
 				// Create a unique ID for each ship instance
-				const shipID = `${this.id}-${rule.baseInfo.type}-${i}`;
-				ships.push(new Ship({ ...rule.baseInfo, shipID }));
+				const shipID = `${this.id}-${rule.type}-${i}`;
+				ships.push(new Ship({ ...rule, shipID }));
 			}
 		});
 		this.fleet = new Fleet(ships);

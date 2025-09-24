@@ -20,7 +20,7 @@
 		"moduleResolution": "NodeNext",
 
 		// Явно указывает TypeScript загрузить определения типов для встроенных модулей Node.js (path, fs, http и т.д.).
-		"types": ["node"],
+		"types": ["node", "ws"],
 
 		// Обязательная опция для проектов, на которые ссылаются через "references". Ускоряет пересборку в монорепозитории.
 		"composite": true,

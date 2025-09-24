@@ -186,6 +186,8 @@ export default [
 			'@typescript-eslint/no-unsafe-member-access': 'off',
 			'@typescript-eslint/no-floating-promises': 'off',
 			'@typescript-eslint/no-unsafe-argument': 'off',
+			'@typescript-eslint/await-thenable': 'off',
+			'@typescript-eslint/no-array-delete': 'off',
 		},
 	},
 	// Конфигурация Prettier должна идти последней

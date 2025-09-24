@@ -41,8 +41,7 @@ export interface ShipDTO {
 	isPlaced: boolean;
 }
 
-export interface FleetRuleDTO {
-	baseInfo: Omit<ShipBaseDTO, 'shipID'>;
+export interface FleetRuleDTO extends Omit<ShipBaseDTO, 'shipID'> {
 	count: number;
 }
 
