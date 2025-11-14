@@ -2,43 +2,73 @@ import './styles.scss';
 
 type buttonElem = HTMLElement | null;
 
-let wss: WebSocket;
+const websocketURL = import.meta.env.VITE_WEBSOCKET_URL.replace('{host}', window.location.hostname);
 
-const createConectionButtonElem: buttonElem = document.getElementById('createConection');
-const createLobbyButtonElem: buttonElem = document.getElementById('createLobby');
-const deletLobbyButtonElem: buttonElem = document.getElementById('deletLobby');
-const closeConectionButtonElem: buttonElem = document.getElementById('closeConection');
+const wss: WebSocket = new WebSocket(websocketURL);
 
-const input = document.querySelector<HTMLInputElement>('#sendMsgInput');
-const button = document.querySelector<HTMLButtonElement>('#sendMsgBtn');
+const createGameButtonElem: buttonElem = document.getElementById('createGame');
+const deleteGameButtonElem: buttonElem = document.getElementById('deleteGame');
+const closeConnectionButtonElem: buttonElem = document.getElementById('closeConnection');
 
-if (createConectionButtonElem) {
-	createConectionButtonElem.onclick = () => {
-		wss = new WebSocket('ws://localhost:8080');
-		wss.onopen = (event) => console.log(`Соединение установлено`, event);
-		wss.onmessage = (event) => console.log(`Получено сообщение:`, event);
-		wss.onerror = (event) => console.log(`Ошибка`, event);
+const gameIdInput = document.querySelector<HTMLInputElement>('#gameIdInput');
+const joinToGameButton = document.querySelector<HTMLButtonElement>('#joinToGame');
+
+wss.onopen = () => {
+	console.log(`Соединение с сервером установлено`);
+};
+
+wss.onmessage = (event) => {
+	const data = JSON.parse(event.data);
+
+	// console.log('Received from server, event:', event);
+	// console.log('Received from server, data:', data);
+	// console.log('Received from server, payload:', data.payload);
+
+	if (data.event === 'gameCreated') {
+		const gameId = data.payload.gameId;
+		console.log(`Создана новая игра с ID: ${gameId}`);
+	}
+	if (data.event === 'error') {
+		console.error(`Ошибка от сервера: ${data.payload}`);
+	}
+};
+
+if (createGameButtonElem) {
+	createGameButtonElem.onclick = () => {
+		const message = {
+			event: 'createGame',
+		};
+		wss.send(JSON.stringify(message));
 	};
 }
-if (createLobbyButtonElem) {
-	createLobbyButtonElem.onclick = () => {};
-}
-if (deletLobbyButtonElem) {
-	deletLobbyButtonElem.onclick = () => {};
-}
-if (closeConectionButtonElem) {
-	closeConectionButtonElem.onclick = () => {
-		wss.close();
-		wss.onclose = (event) => console.log(`Соединение закрыто`, event);
-	};
-}
 
-if (button) {
-	button.onclick = () => {
-		if (input) {
-			wss.send(input.value);
-			console.log(`отправили с клиента на сервер: ${input.value}`);
-			input.value = '';
+if (joinToGameButton) {
+	joinToGameButton.onclick = () => {
+		if (gameIdInput) {
+			const message = {
+				event: 'joinToGame',
+				payload: {
+					gameId: gameIdInput.value,
+				},
+			};
+			wss.send(JSON.stringify(message));
+			console.log(`отправили с клиента на сервер: ${JSON.stringify(message)}`);
+			gameIdInput.value = '';
 		}
+	};
+}
+
+if (deleteGameButtonElem) {
+	deleteGameButtonElem.onclick = () => {
+		const message = {
+			event: 'deleteGame',
+		};
+		wss.send(JSON.stringify(message));
+	};
+}
+if (closeConnectionButtonElem) {
+	closeConnectionButtonElem.onclick = () => {
+		wss.close();
+		wss.onclose = () => console.log(`Соединение закрыто`);
 	};
 }

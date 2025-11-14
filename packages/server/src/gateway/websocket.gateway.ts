@@ -1,78 +1,86 @@
-import type {
-	GameCreatedPayload,
-	GameStateUpdatePayload,
-	ID,
-	JoinGamePayload,
-	MakeTurnPayload,
-	PlaceShipPayload,
-	TurnResultPayload,
-	UnplaceShipPayload,
-	UpdateSettingsPayload,
-} from '@sea-battle/shared';
-import { gameService, type IGameService } from '../services/game.service';
+import { GameStateUpdatePayload, JoinGamePayload } from '@sea-battle/shared';
+import type { WebSocket } from 'ws';
 
-// This is a conceptual representation. The actual implementation will depend on the WebSocket library (e.g., Socket.IO, ws).
-interface ISocket {
-	id: ID;
-	emit(event: string, payload: any): void;
-	// other socket properties and methods
-}
+import { IGame } from '../core/game/types';
+import { gameService } from '../services/game.service';
+import type { IGameService } from '../services/types';
 
-export interface IWebSocketGateway {
-	handleCreateGame(socket: ISocket): GameCreatedPayload;
-	handleJoinGame(socket: ISocket, payload: JoinGamePayload): GameStateUpdatePayload;
-	handleUpdateSettings(socket: ISocket, payload: UpdateSettingsPayload): GameStateUpdatePayload;
-	handlePlaceShip(socket: ISocket, payload: PlaceShipPayload): GameStateUpdatePayload;
-	handleUnplaceShip(socket: ISocket, payload: UnplaceShipPayload): GameStateUpdatePayload;
-	handlePlayerReady(socket: ISocket): GameStateUpdatePayload;
-	handleMakeTurn(socket: ISocket, payload: MakeTurnPayload): TurnResultPayload;
-	handleSurrender(socket: ISocket): GameStateUpdatePayload;
-	handleReturnToLobby(socket: ISocket): void;
-	handleDestroyLobby(socket: ISocket): void;
-}
+import { mapToGameStateDTO } from './mapper';
+import type { IWebSocketGateway } from './types';
 
-export class WebSocketGateway implements IWebSocketGateway {
-	constructor(private readonly gameService: IGameService) {}
+class WebSocketGateway implements IWebSocketGateway {
+	private clients: Map<string, WebSocket> = new Map();
+	private readonly gameService: IGameService;
 
-	public handleCreateGame(socket: ISocket): GameCreatedPayload {
-		return this.gameService.createNewGame(socket.id);
+	constructor(gameService: IGameService) {
+		this.gameService = gameService;
 	}
 
-	public handleJoinGame(socket: ISocket, payload: JoinGamePayload): GameStateUpdatePayload {
-		throw new Error('Method not implemented.');
+	public handleCreateGame(socket: WebSocket): void {
+		if (socket) {
+			const createdGame: IGame = this.gameService.createNewGame();
+			const [firstPlayer] = createdGame.getPlayers();
+
+			if (!firstPlayer) {
+				console.error('Game create error: No players found in the created game.');
+
+				throw new Error('Game creation failed: No players found.');
+			}
+
+			this.clients.set(firstPlayer.playerId, socket);
+
+			const gameCreatedPayload = mapToGameStateDTO(createdGame, firstPlayer.playerId);
+
+			socket.send(
+				JSON.stringify({
+					event: 'gameCreated',
+					payload: gameCreatedPayload,
+				})
+			);
+		}
 	}
 
-	public handleUpdateSettings(socket: ISocket, payload: UpdateSettingsPayload): GameStateUpdatePayload {
-		throw new Error('Method not implemented.');
+	public handleJoinGame(socket: WebSocket, payload: string): GameStateUpdatePayload {
+		socket.send(console.log('123'));
 	}
 
-	public handlePlaceShip(socket: ISocket, payload: PlaceShipPayload): GameStateUpdatePayload {
-		throw new Error('Method not implemented.');
-	}
+	// public handleUpdateSettings(
+	// 	socket: WebSocket,
+	// 	payload: UpdateSettingsPayload
+	// ): GameStateUpdatePayload {
+	// 	throw new Error('Method not implemented.');
+	// }
 
-	public handleUnplaceShip(socket: ISocket, payload: UnplaceShipPayload): GameStateUpdatePayload {
-		throw new Error('Method not implemented.');
-	}
+	// public handlePlaceShip(socket: WebSocket, payload: PlaceShipPayload): GameStateUpdatePayload {
+	// 	throw new Error('Method not implemented.');
+	// }
 
-	public handlePlayerReady(socket: ISocket): GameStateUpdatePayload {
-		throw new Error('Method not implemented.');
-	}
+	// public handleUnplaceShip(
+	// 	socket: WebSocket,
+	// 	payload: UnplaceShipPayload
+	// ): GameStateUpdatePayload {
+	// 	throw new Error('Method not implemented.');
+	// }
 
-	public handleMakeTurn(socket: ISocket, payload: MakeTurnPayload): TurnResultPayload {
-		throw new Error('Method not implemented.');
-	}
+	// public handlePlayerReady(socket: WebSocket): GameStateUpdatePayload {
+	// 	throw new Error('Method not implemented.');
+	// }
 
-	public handleSurrender(socket: ISocket): GameStateUpdatePayload {
-		throw new Error('Method not implemented.');
-	}
+	// public handleMakeTurn(socket: WebSocket, payload: MakeTurnPayload): TurnResultPayload {
+	// 	throw new Error('Method not implemented.');
+	// }
 
-	public handleReturnToLobby(socket: ISocket): void {
-		throw new Error('Method not implemented.');
-	}
+	// public handleSurrender(socket: WebSocket): GameStateUpdatePayload {
+	// 	throw new Error('Method not implemented.');
+	// }
 
-	public handleDestroyLobby(socket: ISocket): void {
-		throw new Error('Method not implemented.');
-	}
+	// public handleReturnToLobby(socket: WebSocket): void {
+	// 	throw new Error('Method not implemented.');
+	// }
+
+	// public handleDestroyLobby(socket: WebSocket): void {
+	// 	throw new Error('Method not implemented.');
+	// }
 
 	// private broadcastToPlayers(gameState: GameStateDTO): void {
 	// 	// Logic to send updates to all players in a game

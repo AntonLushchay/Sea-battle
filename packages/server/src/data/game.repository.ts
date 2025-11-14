@@ -1,25 +1,23 @@
-import type { ID } from '@sea-battle/shared';
+import type { IGame } from '../core/game/types';
 
-import type { IGame } from '../core/game';
-
-export interface IGameRepository {
-	save(game: IGame): void;
-	findById(gameId: ID): IGame | undefined;
-	delete(gameId: ID): void;
-}
+import { IGameRepository } from './types';
 
 class GameRepositoryImpl implements IGameRepository {
-	private games: Map<ID, IGame> = new Map();
+	private games: Map<string, IGame> = new Map();
 
 	public save(game: IGame): void {
-		this.games.set(game.getId(), game);
+		this.games.set(game.gameId, game);
 	}
 
-	public findById(gameId: ID): IGame | undefined {
+	public findById(gameId: string): IGame | undefined {
 		return this.games.get(gameId);
 	}
 
-	public delete(gameId: ID): void {
+	public findAll(): IGame[] {
+		return Array.from(this.games.values());
+	}
+
+	public delete(gameId: string): void {
 		this.games.delete(gameId);
 	}
 }

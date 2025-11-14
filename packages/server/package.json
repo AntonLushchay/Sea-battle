@@ -4,6 +4,7 @@
 	"main": "dist/index.js",
 	"scripts": {
 		"dev": "tsx watch src/index.ts",
+		"start:repl": "tsx src/index.ts",
 		"build": "tsc -p tsconfig.json"
 	},
 	"keywords": [],

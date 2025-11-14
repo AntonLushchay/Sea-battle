@@ -10,8 +10,6 @@ export type GameStatus = 'SETUP' | 'IN_PROGRESS' | 'FINISHED';
 
 export type ShotResult = 'HIT' | 'MISS' | 'SUNK';
 
-export type ID = string;
-
 export type Orientation = 'horizontal' | 'vertical';
 
 // =====================================================================================
@@ -29,7 +27,7 @@ export interface CellDTO {
 }
 
 export interface ShipBaseDTO {
-	shipID: ID;
+	id: string;
 	type: string;
 	size: number;
 }
@@ -41,7 +39,7 @@ export interface ShipDTO {
 	isPlaced: boolean;
 }
 
-export interface FleetRuleDTO extends Omit<ShipBaseDTO, 'shipID'> {
+export interface FleetRuleDTO extends Omit<ShipBaseDTO, 'id'> {
 	count: number;
 }
 
@@ -51,93 +49,139 @@ export interface ShipPlacementDTO {
 	orientation: Orientation;
 }
 
-export interface FleetDTO {
-	ships: ShipDTO[];
-}
-
 export interface BoardDTO {
 	size: number;
 	cells: CellDTO[][];
 }
 
 export interface PlayerInfoDTO {
-	playerID: ID;
-	name: string;
+	playerID: string;
 	isReady: boolean;
 }
 
 export interface GameStateDTO {
-	gameId: ID;
-	myPlayerId: ID;
-	players: PlayerInfoDTO[];
+	gameId: string;
+	myPlayerId: string;
+	players: [PlayerInfoDTO, ...PlayerInfoDTO[]];
 	myBoard: BoardDTO;
-	enemyBoard: BoardDTO;
-	myFleet: FleetDTO;
-	currentPlayerId: ID;
+	enemyBoard: BoardDTO | null;
+	myFleet: ShipDTO[];
+	currentPlayerId: string | null;
 	gameStatus: GameStatus;
 }
 
 // =====================================================================================
-// |                           Client to Server (C2S) Payloads                           |
+// |                           Client to Server (C2S) Messages                           |
 // =====================================================================================
 
-// No payload for creating a game, it's just a signal
-export type CreateGamePayload = void;
-
-export interface JoinGamePayload {
-	gameId: ID;
+export interface CreateGameMessage {
+	event: 'createGame';
 }
 
-export interface UpdateSettingsPayload {
-	playerName?: string;
-	boardSize?: number;
-	fleetConfig?: FleetRuleDTO[];
-	firstPlayer?: TurnOrder;
+export interface JoinGameMessage {
+	event: 'joinToGame';
+	payload: {
+		gameId: string;
+	};
 }
 
-export interface PlaceShipPayload {
-	placedShip: ShipPlacementDTO;
+export interface UpdateSettingsMessage {
+	event: 'updateSettings';
+	payload: {
+		boardSize?: number;
+		fleetConfig?: FleetRuleDTO[];
+		firstPlayer?: TurnOrder;
+	};
 }
 
-export interface UnplaceShipPayload {
-	shipID: ID;
+export interface PlaceShipMessage {
+	event: 'placeShip';
+	payload: {
+		placedShip: ShipPlacementDTO;
+	};
 }
 
-// No payload, just a signal
-export type PlayerReadyPayload = void;
-
-export interface MakeTurnPayload {
-	coords: CoordsDTO;
+export interface UnplaceShipMessage {
+	event: 'unplaceShip';
+	payload: {
+		id: string;
+	};
 }
 
-// No payload, just a signal
-export type SurrenderPayload = void;
+export interface PlayerReadyMessage {
+	event: 'playerReady';
+}
 
-// No payload, just a signal
-export type DestroyLobbyPayload = void;
+export interface MakeTurnMessage {
+	event: 'makeTurn';
+	payload: {
+		coords: CoordsDTO;
+	};
+}
+
+export interface SurrenderMessage {
+	event: 'surrender';
+}
+
+export interface DestroyLobbyMessage {
+	event: 'destroyLobby';
+}
+
+export type C2SMessage =
+	| CreateGameMessage
+	| JoinGameMessage
+	| UpdateSettingsMessage
+	| PlaceShipMessage
+	| UnplaceShipMessage
+	| PlayerReadyMessage
+	| MakeTurnMessage
+	| SurrenderMessage
+	| DestroyLobbyMessage;
 
 // =====================================================================================
-// |                           Server to Client (S2C) Payloads                           |
+// |                           Server to Client (S2C) Messages                           |
 // =====================================================================================
 
-export interface GameCreatedPayload {
-	gameState: GameStateDTO;
+export interface GameCreatedMessage {
+	event: 'gameCreated';
+	payload: {
+		gameState: GameStateDTO;
+	};
 }
 
-export interface GameStateUpdatePayload {
-	gameState: GameStateDTO;
+export interface GameStateUpdateMessage {
+	event: 'gameStateUpdate';
+	payload: {
+		gameState: GameStateDTO;
+	};
 }
 
-export interface TurnResultPayload {
-	coord: CoordsDTO;
-	result: ShotResult;
-	newGameState: GameStateDTO;
+export interface TurnResultMessage {
+	event: 'turnResult';
+	payload: {
+		coord: CoordsDTO;
+		result: ShotResult;
+		GameState: GameStateDTO;
+	};
 }
 
-export interface GameOverPayload {
-	winnerId: ID;
+export interface GameOverMessage {
+	event: 'gameOver';
+	payload: {
+		winnerId: string;
+	};
 }
 
-export interface ErrorPayload {
-	message: string;
+export interface ErrorMessage {
+	event: 'error';
+	payload: {
+		message: string;
+	};
 }
+
+export type S2CMessage =
+	| GameCreatedMessage
+	| GameStateUpdateMessage
+	| TurnResultMessage
+	| GameOverMessage
+	| ErrorMessage;
