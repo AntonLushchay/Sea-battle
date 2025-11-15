@@ -1,17 +1,8 @@
-import type {
-	GameStateUpdatePayload,
-	JoinGamePayload,
-	// 	MakeTurnPayload,
-	// 	PlaceShipPayload,
-	// 	TurnResultPayload,
-	// 	UnplaceShipPayload,
-	// 	UpdateSettingsPayload,
-} from '@sea-battle/shared';
 import type { WebSocket } from 'ws';
 
 export interface IWebSocketGateway {
 	handleCreateGame(socket: WebSocket): void;
-	handleJoinGame(socket: WebSocket, payload: JoinGamePayload): GameStateUpdatePayload;
+	handleJoinGame(socket: WebSocket, gameId: string): void;
 	// handleUpdateSettings(socket: WebSocket, payload: UpdateSettingsPayload): GameStateUpdatePayload;
 	// handlePlaceShip(socket: WebSocket, payload: PlaceShipPayload): GameStateUpdatePayload;
 	// handleUnplaceShip(socket: WebSocket, payload: UnplaceShipPayload): GameStateUpdatePayload;

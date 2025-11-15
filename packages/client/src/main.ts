@@ -28,8 +28,16 @@ wss.onmessage = (event) => {
 		const gameId = data.payload.gameId;
 		console.log(`Создана новая игра с ID: ${gameId}`);
 	}
+
+	if (data.event === 'gameJoined') {
+		const gameId = data.payload.gameId;
+		const playerId = data.payload.myPlayerId;
+		console.log(`Присоединились к игре с ID: ${gameId} с игроком ID: ${playerId}`);
+		console.dir(data.payload);
+	}
+
 	if (data.event === 'error') {
-		console.error(`Ошибка от сервера: ${data.payload}`);
+		console.error(`Ошибка от сервера: ${JSON.stringify(data.payload)}`);
 	}
 };
 
@@ -48,7 +56,7 @@ if (joinToGameButton) {
 			const message = {
 				event: 'joinToGame',
 				payload: {
-					gameId: gameIdInput.value,
+					id: gameIdInput.value,
 				},
 			};
 			wss.send(JSON.stringify(message));

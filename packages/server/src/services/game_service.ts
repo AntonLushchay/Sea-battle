@@ -1,14 +1,5 @@
 import { randomUUID } from 'crypto';
 
-import type {} from // GameStateUpdatePayload,
-// JoinGamePayload,
-// MakeTurnPayload,
-// PlaceShipPayload,
-// TurnResultPayload,
-// UnplaceShipPayload,
-// UpdateSettingsPayload,
-'@sea-battle/shared';
-
 import { Game } from '../core/game/game';
 import type { IGame } from '../core/game/types';
 import { gameRepository } from '../data/game.repository';
@@ -34,9 +25,17 @@ class GameService implements IGameService {
 		return newGame;
 	}
 
-	// public joinGame(playerId: string, payload: JoinGamePayload): GameStateUpdatePayload {
-	// 	throw new Error('Method not implemented.');
-	// }
+	public joinGame(gameId: string): IGame {
+		const joiningPlayerId = randomUUID();
+		const foundGame = this.repository.findById(gameId);
+		if (!foundGame) {
+			throw new Error(`Game with ID ${gameId} not found.`);
+		}
+
+		foundGame.addPlayer(joiningPlayerId);
+
+		return foundGame;
+	}
 
 	// public updateSettings(
 	// 	playerId: string,

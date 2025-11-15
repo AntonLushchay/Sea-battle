@@ -59,6 +59,22 @@ export interface PlayerInfoDTO {
 	isReady: boolean;
 }
 
+export interface UpdateSettingsDTO {
+	boardSize?: number;
+	fleetConfig?: FleetRuleDTO[];
+	firstPlayer?: TurnOrder;
+}
+
+export interface SomeIdDTO {
+	id: string;
+}
+
+export interface TurnResultDTO {
+	coord: CoordsDTO;
+	result: ShotResult;
+	gameState: GameStateDTO;
+}
+
 export interface GameStateDTO {
 	gameId: string;
 	myPlayerId: string;
@@ -80,32 +96,22 @@ export interface CreateGameMessage {
 
 export interface JoinGameMessage {
 	event: 'joinToGame';
-	payload: {
-		gameId: string;
-	};
+	payload: SomeIdDTO;
 }
 
 export interface UpdateSettingsMessage {
 	event: 'updateSettings';
-	payload: {
-		boardSize?: number;
-		fleetConfig?: FleetRuleDTO[];
-		firstPlayer?: TurnOrder;
-	};
+	payload: UpdateSettingsDTO;
 }
 
 export interface PlaceShipMessage {
 	event: 'placeShip';
-	payload: {
-		placedShip: ShipPlacementDTO;
-	};
+	payload: ShipPlacementDTO;
 }
 
 export interface UnplaceShipMessage {
 	event: 'unplaceShip';
-	payload: {
-		id: string;
-	};
+	payload: SomeIdDTO;
 }
 
 export interface PlayerReadyMessage {
@@ -114,9 +120,7 @@ export interface PlayerReadyMessage {
 
 export interface MakeTurnMessage {
 	event: 'makeTurn';
-	payload: {
-		coords: CoordsDTO;
-	};
+	payload: CoordsDTO;
 }
 
 export interface SurrenderMessage {
@@ -144,39 +148,27 @@ export type C2SMessage =
 
 export interface GameCreatedMessage {
 	event: 'gameCreated';
-	payload: {
-		gameState: GameStateDTO;
-	};
+	payload: GameStateDTO;
 }
 
 export interface GameStateUpdateMessage {
 	event: 'gameStateUpdate';
-	payload: {
-		gameState: GameStateDTO;
-	};
+	payload: GameStateDTO;
 }
 
 export interface TurnResultMessage {
 	event: 'turnResult';
-	payload: {
-		coord: CoordsDTO;
-		result: ShotResult;
-		GameState: GameStateDTO;
-	};
+	payload: TurnResultDTO;
 }
 
 export interface GameOverMessage {
 	event: 'gameOver';
-	payload: {
-		winnerId: string;
-	};
+	payload: SomeIdDTO;
 }
 
 export interface ErrorMessage {
 	event: 'error';
-	payload: {
-		message: string;
-	};
+	payload: string;
 }
 
 export type S2CMessage =

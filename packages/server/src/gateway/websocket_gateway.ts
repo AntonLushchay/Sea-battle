@@ -1,8 +1,7 @@
-import { GameStateUpdatePayload, JoinGamePayload } from '@sea-battle/shared';
 import type { WebSocket } from 'ws';
 
 import { IGame } from '../core/game/types';
-import { gameService } from '../services/game.service';
+import { gameService } from '../services/game_service';
 import type { IGameService } from '../services/types';
 
 import { mapToGameStateDTO } from './mapper';
@@ -40,8 +39,34 @@ class WebSocketGateway implements IWebSocketGateway {
 		}
 	}
 
-	public handleJoinGame(socket: WebSocket, payload: string): GameStateUpdatePayload {
-		socket.send(console.log('123'));
+	public handleJoinGame(socket: WebSocket, gameId: string): void {
+		const updatedGame = this.gameService.joinGame(gameId);
+		const [player1, joiningPlayer] = updatedGame.getPlayers();
+
+		if (!joiningPlayer || !player1) {
+			throw new Error('Game join failed: No player found in Game.');
+		}
+		this.clients.set(joiningPlayer.playerId, socket);
+
+		const updatedGamePayloadForPlayer1 = mapToGameStateDTO(updatedGame, player1.playerId);
+		const updatedGamePayloadForJoiningPlayer = mapToGameStateDTO(
+			updatedGame,
+			joiningPlayer.playerId
+		);
+
+		this.clients.get(player1.playerId)?.send(
+			JSON.stringify({
+				event: 'gameJoined',
+				payload: updatedGamePayloadForPlayer1,
+			})
+		);
+
+		this.clients.get(joiningPlayer.playerId)?.send(
+			JSON.stringify({
+				event: 'gameJoined',
+				payload: updatedGamePayloadForJoiningPlayer,
+			})
+		);
 	}
 
 	// public handleUpdateSettings(

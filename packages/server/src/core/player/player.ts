@@ -1,10 +1,3 @@
-// import type {
-// 	CoordsDTO,
-// 	PlaceShipPayload,
-// 	ShotResult,
-// 	UnplaceShipPayload,
-// } from '@sea-battle/shared';
-
 import { Board } from '../board/board';
 import type { IBoard } from '../board/types';
 import { Fleet } from '../fleet/fleet';

@@ -1,18 +1,8 @@
-// import type {
-// 	GameStateUpdatePayload,
-// 	JoinGamePayload,
-// 	MakeTurnPayload,
-// 	PlaceShipPayload,
-// 	TurnResultPayload,
-// 	UnplaceShipPayload,
-// 	UpdateSettingsPayload,
-// } from '@sea-battle/shared';
-
 import type { IGame } from '../core/game/types';
 
 export interface IGameService {
 	createNewGame(): IGame;
-	// joinGame(playerId: string, payload: JoinGamePayload): GameStateUpdatePayload;
+	joinGame(gameId: string): IGame;
 	// updateSettings(playerId: string, payload: UpdateSettingsPayload): GameStateUpdatePayload;
 	// placeShip(playerId: string, payload: PlaceShipPayload): GameStateUpdatePayload;
 	// unplaceShip(playerId: string, payload: UnplaceShipPayload): GameStateUpdatePayload;
