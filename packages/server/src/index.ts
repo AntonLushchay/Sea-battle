@@ -5,6 +5,7 @@ import {
 	isCreateGameMessage,
 	isJoinToGameMessage,
 	isObjectWithEvent,
+	isReconnectMessage,
 } from './utils/type_guards/type_guards';
 
 const wss = new WebSocketServer({ port: 8080 });
@@ -39,6 +40,19 @@ wss.on('connection', (ws) => {
 						throw new Error('Invalid joinToGame message: payload.id must be string');
 					}
 					webSocketGateway.handleJoinGame(ws, data.payload.id);
+					break;
+
+				case 'reconnect':
+					if (!isReconnectMessage(data)) {
+						throw new Error(
+							'Invalid reconnect message: payload must contain playerId and gameId'
+						);
+					}
+					webSocketGateway.handleReconnect(
+						ws,
+						data.payload.playerId,
+						data.payload.gameId
+					);
 					break;
 
 				// TODO: Добавить обработку остальных событий с type guard'ами

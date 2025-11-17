@@ -37,6 +37,20 @@ class GameService implements IGameService {
 		return foundGame;
 	}
 
+	public reconnectPlayer(playerId: string, gameId: string): [boolean, IGame | null] {
+		const foundGame = this.repository.findById(gameId);
+		if (!foundGame) {
+			return [false, null];
+		}
+
+		const player = foundGame.getPlayer(playerId);
+		if (!player) {
+			return [false, null];
+		}
+
+		return [true, foundGame];
+	}
+
 	// public updateSettings(
 	// 	playerId: string,
 	// 	payload: UpdateSettingsPayload

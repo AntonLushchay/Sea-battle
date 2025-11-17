@@ -65,6 +65,12 @@ export interface UpdateSettingsDTO {
 	firstPlayer?: TurnOrder;
 }
 
+export interface UpdateSettingsPayloadDTO {
+	playerId: SomeIdDTO;
+	gameId: SomeIdDTO;
+	settings: UpdateSettingsDTO;
+}
+
 export interface SomeIdDTO {
 	id: string;
 }
@@ -73,6 +79,11 @@ export interface TurnResultDTO {
 	coord: CoordsDTO;
 	result: ShotResult;
 	gameState: GameStateDTO;
+}
+
+export interface ReconnectPayloadDTO {
+	playerId: string;
+	gameId: string;
 }
 
 export interface GameStateDTO {
@@ -99,9 +110,14 @@ export interface JoinGameMessage {
 	payload: SomeIdDTO;
 }
 
+export interface ReconnectMessage {
+	event: 'reconnect';
+	payload: ReconnectPayloadDTO;
+}
+
 export interface UpdateSettingsMessage {
 	event: 'updateSettings';
-	payload: UpdateSettingsDTO;
+	payload: UpdateSettingsPayloadDTO;
 }
 
 export interface PlaceShipMessage {
@@ -131,23 +147,22 @@ export interface DestroyLobbyMessage {
 	event: 'destroyLobby';
 }
 
-export type C2SMessage =
-	| CreateGameMessage
-	| JoinGameMessage
-	| UpdateSettingsMessage
-	| PlaceShipMessage
-	| UnplaceShipMessage
-	| PlayerReadyMessage
-	| MakeTurnMessage
-	| SurrenderMessage
-	| DestroyLobbyMessage;
-
 // =====================================================================================
 // |                           Server to Client (S2C) Messages                           |
 // =====================================================================================
 
 export interface GameCreatedMessage {
 	event: 'gameCreated';
+	payload: GameStateDTO;
+}
+
+export interface GameJoinedMessage {
+	event: 'gameJoined';
+	payload: GameStateDTO;
+}
+
+export interface ReconnectedMessage {
+	event: 'reconnected';
 	payload: GameStateDTO;
 }
 
@@ -170,10 +185,3 @@ export interface ErrorMessage {
 	event: 'error';
 	payload: string;
 }
-
-export type S2CMessage =
-	| GameCreatedMessage
-	| GameStateUpdateMessage
-	| TurnResultMessage
-	| GameOverMessage
-	| ErrorMessage;

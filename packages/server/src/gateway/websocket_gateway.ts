@@ -8,6 +8,7 @@ import { mapToGameStateDTO } from './mapper';
 import type { IWebSocketGateway } from './types';
 
 class WebSocketGateway implements IWebSocketGateway {
+	// Map to store connected clients with their player IDs: playerId, WebSocket
 	private clients: Map<string, WebSocket> = new Map();
 	private readonly gameService: IGameService;
 
@@ -28,12 +29,10 @@ class WebSocketGateway implements IWebSocketGateway {
 
 			this.clients.set(firstPlayer.playerId, socket);
 
-			const gameCreatedPayload = mapToGameStateDTO(createdGame, firstPlayer.playerId);
-
 			socket.send(
 				JSON.stringify({
 					event: 'gameCreated',
-					payload: gameCreatedPayload,
+					payload: mapToGameStateDTO(createdGame, firstPlayer.playerId),
 				})
 			);
 		}
@@ -41,30 +40,39 @@ class WebSocketGateway implements IWebSocketGateway {
 
 	public handleJoinGame(socket: WebSocket, gameId: string): void {
 		const updatedGame = this.gameService.joinGame(gameId);
-		const [player1, joiningPlayer] = updatedGame.getPlayers();
+		const players = updatedGame.getPlayers();
 
-		if (!joiningPlayer || !player1) {
+		if (!players[0] || !players[1]) {
 			throw new Error('Game join failed: No player found in Game.');
 		}
-		this.clients.set(joiningPlayer.playerId, socket);
+		this.clients.set(players[1].playerId, socket);
 
-		const updatedGamePayloadForPlayer1 = mapToGameStateDTO(updatedGame, player1.playerId);
-		const updatedGamePayloadForJoiningPlayer = mapToGameStateDTO(
-			updatedGame,
-			joiningPlayer.playerId
+		for (const player of players) {
+			this.clients.get(player.playerId)?.send(
+				JSON.stringify({
+					event: 'gameJoined',
+					payload: mapToGameStateDTO(updatedGame, player.playerId),
+				})
+			);
+		}
+	}
+
+	public handleReconnect(socket: WebSocket, playerId: string, gameId: string): void {
+		const [isReconectable, actualGameState] = this.gameService.reconnectPlayer(
+			playerId,
+			gameId
 		);
 
-		this.clients.get(player1.playerId)?.send(
-			JSON.stringify({
-				event: 'gameJoined',
-				payload: updatedGamePayloadForPlayer1,
-			})
-		);
+		if (!isReconectable || !actualGameState) {
+			throw new Error('Reconnection failed: Invalid playerId or gameId.');
+		}
 
-		this.clients.get(joiningPlayer.playerId)?.send(
+		this.clients.set(playerId, socket);
+
+		socket.send(
 			JSON.stringify({
-				event: 'gameJoined',
-				payload: updatedGamePayloadForJoiningPlayer,
+				event: 'reconnected',
+				payload: mapToGameStateDTO(actualGameState, playerId),
 			})
 		);
 	}

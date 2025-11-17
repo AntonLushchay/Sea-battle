@@ -2,7 +2,7 @@
 // |                               Type Guards & Helpers                               |
 // =====================================================================================
 
-import { CreateGameMessage, JoinGameMessage } from '@sea-battle/shared';
+import { CreateGameMessage, JoinGameMessage, ReconnectMessage } from '@sea-battle/shared';
 
 // Базовый тип после первичной проверки
 type BaseMessage = { event: string; payload?: unknown };
@@ -29,5 +29,16 @@ export const isJoinToGameMessage = (obj: BaseMessage): obj is JoinGameMessage =>
 		typeof obj.payload === 'object' &&
 		obj.payload !== null &&
 		typeof (obj.payload as { id?: unknown }).id === 'string'
+	);
+};
+
+// Проверка, что это reconnect message (payload: ReconnectPayloadDTO с playerId и gameId).
+export const isReconnectMessage = (obj: BaseMessage): obj is ReconnectMessage => {
+	return (
+		obj.event === 'reconnect' &&
+		typeof obj.payload === 'object' &&
+		obj.payload !== null &&
+		typeof (obj.payload as { playerId?: unknown }).playerId === 'string' &&
+		typeof (obj.payload as { gameId?: unknown }).gameId === 'string'
 	);
 };

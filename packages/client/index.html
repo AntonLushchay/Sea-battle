@@ -4,6 +4,51 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Sea Battle</title>
+		<style>
+			#gameBoard td {
+				width: 30px !important;
+				height: 30px !important;
+				overflow: hidden;
+			}
+			.ship-cell {
+				position: relative;
+				background-image: url('/src/assets/korabli~2.png');
+				background-size: 400% auto;
+				background-repeat: no-repeat;
+				background-position: center;
+			}
+			.ship-cell.part-1 {
+				background-position-x: 0%;
+			}
+			.ship-cell.part-2 {
+				background-position-x: 33.33%;
+			}
+			.ship-cell.part-3 {
+				background-position-x: 66.66%;
+			}
+			.ship-cell.part-4 {
+				background-position-x: 100%;
+			}
+			.ship-cell-2 {
+				position: relative;
+				background-image: url('/src/assets/remove white backgro.png');
+				background-size: 400% auto;
+				background-repeat: no-repeat;
+				background-position: center;
+			}
+			.ship-cell-2.part-1 {
+				background-position-x: 0%;
+			}
+			.ship-cell-2.part-2 {
+				background-position-x: 33.33%;
+			}
+			.ship-cell-2.part-3 {
+				background-position-x: 66.66%;
+			}
+			.ship-cell-2.part-4 {
+				background-position-x: 100%;
+			}
+		</style>
 	</head>
 	<body>
 		<div id="app"></div>
@@ -15,6 +60,135 @@
 			<input id="gameIdInput" type="text" placeholder="game ID" />
 			<button id="joinToGame">Join to game</button>
 		</div>
+		<div>
+			<input id="gameIdForReconnectInput" type="text" placeholder="game ID" />
+			<button id="reconnectToGame">Reconnect to game</button>
+		</div>
+
+		<table id="gameBoard" style="border-collapse: collapse; margin-top: 20px">
+			<tbody>
+				<tr>
+					<td class="ship-cell part-1" style="border: 1px solid #333"></td>
+					<td class="ship-cell part-2" style="border: 1px solid #333"></td>
+					<td class="ship-cell part-3" style="border: 1px solid #333"></td>
+					<td class="ship-cell part-4" style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+				</tr>
+				<tr>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+				</tr>
+				<tr>
+					<td class="ship-cell-2 part-1" style="border: 1px solid #333"></td>
+					<td class="ship-cell-2 part-2" style="border: 1px solid #333"></td>
+					<td class="ship-cell-2 part-3" style="border: 1px solid #333"></td>
+					<td class="ship-cell-2 part-4" style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+				</tr>
+				<tr>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+				</tr>
+				<tr>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+				</tr>
+				<tr>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+				</tr>
+				<tr>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+				</tr>
+				<tr>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+				</tr>
+				<tr>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+				</tr>
+				<tr>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+					<td style="border: 1px solid #333"></td>
+				</tr>
+			</tbody>
+		</table>
 		<script type="module" src="/src/main.ts"></script>
 	</body>
 </html>

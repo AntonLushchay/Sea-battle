@@ -1,11 +1,4 @@
-import type {
-	// CoordsDTO,
-	GameStatus,
-	// PlaceShipPayload,
-	// ShotResult,
-	// UnplaceShipPayload,
-	// UpdateSettingsPayload,
-} from '@sea-battle/shared';
+import type { GameStatus } from '@sea-battle/shared';
 
 import { Player } from '../player/player';
 import type { IPlayer } from '../player/types';

@@ -13,9 +13,17 @@ const closeConnectionButtonElem: buttonElem = document.getElementById('closeConn
 const gameIdInput = document.querySelector<HTMLInputElement>('#gameIdInput');
 const joinToGameButton = document.querySelector<HTMLButtonElement>('#joinToGame');
 
+const gameIdForReconnectInput = document.querySelector<HTMLInputElement>(
+	'#gameIdForReconnectInput'
+);
+const reconnectToGameButton = document.querySelector<HTMLButtonElement>('#reconnectToGame');
+
 wss.onopen = () => {
 	console.log(`Соединение с сервером установлено`);
 };
+
+let playerId = '';
+let gameId = '';
 
 wss.onmessage = (event) => {
 	const data = JSON.parse(event.data);
@@ -25,15 +33,22 @@ wss.onmessage = (event) => {
 	// console.log('Received from server, payload:', data.payload);
 
 	if (data.event === 'gameCreated') {
-		const gameId = data.payload.gameId;
+		gameId = data.payload.gameId;
+		playerId = data.payload.myPlayerId;
 		console.log(`Создана новая игра с ID: ${gameId}`);
 	}
 
 	if (data.event === 'gameJoined') {
-		const gameId = data.payload.gameId;
-		const playerId = data.payload.myPlayerId;
+		gameId = data.payload.gameId;
+		playerId = data.payload.myPlayerId;
 		console.log(`Присоединились к игре с ID: ${gameId} с игроком ID: ${playerId}`);
 		console.dir(data.payload);
+	}
+
+	if (data.event === 'reconnected') {
+		gameId = data.payload.gameId;
+		playerId = data.payload.myPlayerId;
+		console.log(`Восстановлено соединение с игрой ID: ${gameId} с игроком ID: ${playerId}`);
 	}
 
 	if (data.event === 'error') {
@@ -66,6 +81,23 @@ if (joinToGameButton) {
 	};
 }
 
+if (reconnectToGameButton) {
+	reconnectToGameButton.onclick = () => {
+		if (gameIdForReconnectInput) {
+			const message = {
+				event: 'reconnect',
+				payload: {
+					playerId: playerId,
+					gameId: gameIdForReconnectInput.value,
+				},
+			};
+			wss.send(JSON.stringify(message));
+			console.log(`отправили с клиента на сервер: ${JSON.stringify(message)}`);
+			gameIdForReconnectInput.value = '';
+		}
+	};
+}
+
 if (deleteGameButtonElem) {
 	deleteGameButtonElem.onclick = () => {
 		const message = {
@@ -80,3 +112,5 @@ if (closeConnectionButtonElem) {
 		wss.onclose = () => console.log(`Соединение закрыто`);
 	};
 }
+
+// когда теряется сеть и игрок хочет реконектнуться, нужно нажать кнопку recconect и тогда клиент проверит localstorage и попробует приконектиться к сохранненой сессии. Если в localstorage несколько сессий то выводится выбор к какой сессии подключиться. В localstorege пусть хронятся playerId и gameId. А если сессий нет выводить ошибку.
