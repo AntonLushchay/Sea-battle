@@ -1,3 +1,4 @@
+import { UpdateSettingsDTO } from '@sea-battle/shared';
 import type { WebSocket } from 'ws';
 
 import { IGame } from '../core/game/types';
@@ -19,20 +20,20 @@ class WebSocketGateway implements IWebSocketGateway {
 	public handleCreateGame(socket: WebSocket): void {
 		if (socket) {
 			const createdGame: IGame = this.gameService.createNewGame();
-			const [firstPlayer] = createdGame.getPlayers();
+			const [player1] = createdGame.getPlayers();
 
-			if (!firstPlayer) {
+			if (!player1) {
 				console.error('Game create error: No players found in the created game.');
 
 				throw new Error('Game creation failed: No players found.');
 			}
 
-			this.clients.set(firstPlayer.playerId, socket);
+			this.clients.set(player1.playerId, socket);
 
 			socket.send(
 				JSON.stringify({
 					event: 'gameCreated',
-					payload: mapToGameStateDTO(createdGame, firstPlayer.playerId),
+					payload: mapToGameStateDTO(createdGame, player1.playerId),
 				})
 			);
 		}
@@ -40,14 +41,14 @@ class WebSocketGateway implements IWebSocketGateway {
 
 	public handleJoinGame(socket: WebSocket, gameId: string): void {
 		const updatedGame = this.gameService.joinGame(gameId);
-		const players = updatedGame.getPlayers();
+		const [player1, player2] = updatedGame.getPlayers();
 
-		if (!players[0] || !players[1]) {
+		if (!player1 || !player2) {
 			throw new Error('Game join failed: No player found in Game.');
 		}
-		this.clients.set(players[1].playerId, socket);
+		this.clients.set(player2.playerId, socket);
 
-		for (const player of players) {
+		for (const player of [player1, player2]) {
 			this.clients.get(player.playerId)?.send(
 				JSON.stringify({
 					event: 'gameJoined',
@@ -77,12 +78,22 @@ class WebSocketGateway implements IWebSocketGateway {
 		);
 	}
 
-	// public handleUpdateSettings(
-	// 	socket: WebSocket,
-	// 	payload: UpdateSettingsPayload
-	// ): GameStateUpdatePayload {
-	// 	throw new Error('Method not implemented.');
-	// }
+	public handleUpdateSettings(
+		playerId: string,
+		gameId: string,
+		settings: UpdateSettingsDTO
+	): void {
+		const updatedGame = this.gameService.updateSettings(playerId, gameId, settings);
+
+		for (const player of updatedGame.getPlayers()) {
+			this.clients.get(player.playerId)?.send(
+				JSON.stringify({
+					event: 'updatedGameState',
+					payload: mapToGameStateDTO(updatedGame, player.playerId),
+				})
+			);
+		}
+	}
 
 	// public handlePlaceShip(socket: WebSocket, payload: PlaceShipPayload): GameStateUpdatePayload {
 	// 	throw new Error('Method not implemented.');
@@ -113,10 +124,6 @@ class WebSocketGateway implements IWebSocketGateway {
 
 	// public handleDestroyLobby(socket: WebSocket): void {
 	// 	throw new Error('Method not implemented.');
-	// }
-
-	// private broadcastToPlayers(gameState: GameStateDTO): void {
-	// 	// Logic to send updates to all players in a game
 	// }
 }
 

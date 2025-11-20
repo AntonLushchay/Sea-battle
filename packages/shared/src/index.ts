@@ -16,20 +16,39 @@ export type Orientation = 'horizontal' | 'vertical';
 // |                                        DTOs                                         |
 // =====================================================================================
 
-export interface CoordsDTO {
-	x: number;
-	y: number;
-}
-
-export interface CellDTO {
-	coords: CoordsDTO;
-	status: CellStatus;
-}
-
-export interface ShipBaseDTO {
+export interface SomeIdDTO {
 	id: string;
-	type: string;
+}
+
+export interface ReconnectPayloadDTO {
+	playerId: string;
+	gameId: string;
+}
+
+export interface UpdateSettingsPayloadDTO {
+	playerId: string;
+	gameId: string;
+	settings: UpdateSettingsDTO;
+}
+
+export interface UpdateSettingsDTO {
+	boardSize: number;
+	fleetConfig: FleetRuleDTO[];
+	firstPlayer: TurnOrder;
+}
+
+export interface PlayerInfoDTO {
+	playerID: string;
+	isReady: boolean;
+}
+
+export interface BoardDTO {
 	size: number;
+	cells: CellDTO[][];
+}
+
+export interface FleetRuleDTO extends Omit<ShipBaseDTO, 'id'> {
+	count: number;
 }
 
 export interface ShipDTO {
@@ -39,8 +58,10 @@ export interface ShipDTO {
 	isPlaced: boolean;
 }
 
-export interface FleetRuleDTO extends Omit<ShipBaseDTO, 'id'> {
-	count: number;
+export interface ShipBaseDTO {
+	id: string;
+	type: string;
+	size: number;
 }
 
 export interface ShipPlacementDTO {
@@ -49,41 +70,20 @@ export interface ShipPlacementDTO {
 	orientation: Orientation;
 }
 
-export interface BoardDTO {
-	size: number;
-	cells: CellDTO[][];
+export interface CellDTO {
+	coords: CoordsDTO;
+	status: CellStatus;
 }
 
-export interface PlayerInfoDTO {
-	playerID: string;
-	isReady: boolean;
-}
-
-export interface UpdateSettingsDTO {
-	boardSize?: number;
-	fleetConfig?: FleetRuleDTO[];
-	firstPlayer?: TurnOrder;
-}
-
-export interface UpdateSettingsPayloadDTO {
-	playerId: SomeIdDTO;
-	gameId: SomeIdDTO;
-	settings: UpdateSettingsDTO;
-}
-
-export interface SomeIdDTO {
-	id: string;
+export interface CoordsDTO {
+	x: number;
+	y: number;
 }
 
 export interface TurnResultDTO {
 	coord: CoordsDTO;
 	result: ShotResult;
 	gameState: GameStateDTO;
-}
-
-export interface ReconnectPayloadDTO {
-	playerId: string;
-	gameId: string;
 }
 
 export interface GameStateDTO {
@@ -167,7 +167,7 @@ export interface ReconnectedMessage {
 }
 
 export interface GameStateUpdateMessage {
-	event: 'gameStateUpdate';
+	event: 'updatedGameState';
 	payload: GameStateDTO;
 }
 

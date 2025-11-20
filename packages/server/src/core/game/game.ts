@@ -1,4 +1,4 @@
-import type { GameStatus } from '@sea-battle/shared';
+import type { GameStatus, UpdateSettingsDTO } from '@sea-battle/shared';
 
 import { Player } from '../player/player';
 import type { IPlayer } from '../player/types';
@@ -57,23 +57,22 @@ export class Game implements IGame {
 		this.players.push(player);
 	}
 
-	// public isHost(playerId: string): boolean {
-	// 	return this.players[0]?.getId() === playerId;
-	// }
+	public isHost(playerId: string): boolean {
+		return this.players[0]?.playerId === playerId;
+	}
 
-	// public updateSettings(playerId: string, settings: UpdateSettingsPayload): void {
-	// 	if (this.status !== 'SETUP') throw new Error('Can only update settings during setup.');
-	// 	if (!this.isHost(playerId)) throw new Error('Only the host can change settings.');
+	public updateSettings(playerId: string, settings: UpdateSettingsDTO): void {
+		if (!this.isHost(playerId)) throw new Error('Only the host can change settings.');
+		if (this.status !== 'SETUP') throw new Error('Can only update settings during setup.');
+		if (settings.fleetConfig.some((rule) => rule.size > settings.boardSize)) {
+			throw new Error('Ships cannot be larger than the board size.');
+		}
 
-	// 	this.boardSize = settings.boardSize ?? this.boardSize;
-	// 	this.fleetRules = settings.fleetConfig ?? this.fleetRules;
-
-	// 	// Re-initialize all players with new settings
-	// 	this.players.forEach((p) => {
-	// 		p.rebuildBoard(this.boardSize);
-	// 		p.regenerateFleet(this.fleetRules);
-	// 	});
-	// }
+		this.players.forEach((player) => {
+			player.rebuildBoard(settings.boardSize);
+			player.rebuildFleet(settings.fleetConfig);
+		});
+	}
 
 	// public placeShip(playerId: string, placement: PlaceShipPayload): void {
 	// 	this.getPlayer(playerId)?.placeShip(placement);

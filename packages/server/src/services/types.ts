@@ -1,10 +1,12 @@
+import { UpdateSettingsDTO } from '@sea-battle/shared';
+
 import type { IGame } from '../core/game/types';
 
 export interface IGameService {
 	createNewGame(): IGame;
 	joinGame(gameId: string): IGame;
 	reconnectPlayer(playerId: string, gameId: string): [boolean, IGame | null];
-	// updateSettings(playerId: string, payload: UpdateSettingsPayload): GameStateUpdatePayload;
+	updateSettings(playerId: string, gameId: string, settings: UpdateSettingsDTO): IGame;
 	// placeShip(playerId: string, payload: PlaceShipPayload): GameStateUpdatePayload;
 	// unplaceShip(playerId: string, payload: UnplaceShipPayload): GameStateUpdatePayload;
 	// playerReady(playerId: string): GameStateUpdatePayload;

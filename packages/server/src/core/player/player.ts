@@ -1,3 +1,5 @@
+import { FleetRuleDTO } from '@sea-battle/shared';
+
 import { Board } from '../board/board';
 import type { IBoard } from '../board/types';
 import { Fleet } from '../fleet/fleet';
@@ -38,7 +40,15 @@ export class Player implements IPlayer {
 	}
 
 	public rebuildBoard(size: number): void {
-		this.board = new Board(size);
+		if (this.board.size !== size) {
+			this.board = new Board(size);
+			console.log(`Player ${this.playerId} board rebuilt to size ${size}`);
+		}
+	}
+
+	public rebuildFleet(fleetConfig: FleetRuleDTO[]): void {
+		this.fleet = new Fleet(fleetConfig);
+		console.log(`Player ${this.playerId} fleet rebuilt with new configuration`);
 	}
 
 	// public placeShip({ placedShip }: PlaceShipPayload): void {

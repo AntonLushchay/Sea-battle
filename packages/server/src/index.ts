@@ -6,6 +6,7 @@ import {
 	isJoinToGameMessage,
 	isObjectWithEvent,
 	isReconnectMessage,
+	isUpdateSettingsMessage,
 } from './utils/type_guards/type_guards';
 
 const wss = new WebSocketServer({ port: 8080 });
@@ -55,7 +56,19 @@ wss.on('connection', (ws) => {
 					);
 					break;
 
-				// TODO: Добавить обработку остальных событий с type guard'ами
+				case 'updateSettings':
+					if (!isUpdateSettingsMessage(data)) {
+						throw new Error(
+							'Invalid updateSettings message: payload must contain playerId, gameId and settings'
+						);
+					}
+					webSocketGateway.handleUpdateSettings(
+						data.payload.playerId,
+						data.payload.gameId,
+						data.payload.settings
+					);
+					break;
+
 				default:
 					throw new Error(`Unknown event: ${data.event}`);
 			}

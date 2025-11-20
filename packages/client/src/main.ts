@@ -18,37 +18,44 @@ const gameIdForReconnectInput = document.querySelector<HTMLInputElement>(
 );
 const reconnectToGameButton = document.querySelector<HTMLButtonElement>('#reconnectToGame');
 
+// Elements for Update Settings (simple, no styles)
+const boardSizeInput = document.querySelector<HTMLInputElement>('#boardSizeInput');
+const firstPlayerSelect = document.querySelector<HTMLSelectElement>('#firstPlayerSelect');
+const fleetConfigInput = document.querySelector<HTMLTextAreaElement>('#fleetConfigInput');
+const updateSettingsBtn = document.querySelector<HTMLButtonElement>('#updateSettingsBtn');
+
 wss.onopen = () => {
 	console.log(`Соединение с сервером установлено`);
 };
 
-let playerId = '';
+let playerIdHost = '';
+let playerIdGuest = '';
 let gameId = '';
 
 wss.onmessage = (event) => {
 	const data = JSON.parse(event.data);
 
 	// console.log('Received from server, event:', event);
-	// console.log('Received from server, data:', data);
+	console.log('Received from server, data:', data);
 	// console.log('Received from server, payload:', data.payload);
 
 	if (data.event === 'gameCreated') {
 		gameId = data.payload.gameId;
-		playerId = data.payload.myPlayerId;
+		playerIdHost = data.payload.myPlayerId;
 		console.log(`Создана новая игра с ID: ${gameId}`);
 	}
 
 	if (data.event === 'gameJoined') {
 		gameId = data.payload.gameId;
-		playerId = data.payload.myPlayerId;
-		console.log(`Присоединились к игре с ID: ${gameId} с игроком ID: ${playerId}`);
+		playerIdGuest = data.payload.myPlayerId;
+		console.log(`Присоединились к игре с ID: ${gameId} с игроком ID: ${playerIdGuest}`);
 		console.dir(data.payload);
 	}
 
 	if (data.event === 'reconnected') {
 		gameId = data.payload.gameId;
-		playerId = data.payload.myPlayerId;
-		console.log(`Восстановлено соединение с игрой ID: ${gameId} с игроком ID: ${playerId}`);
+		playerIdHost = data.payload.myPlayerId;
+		console.log(`Восстановлено соединение с игрой ID: ${gameId} с игроком ID: ${playerIdHost}`);
 	}
 
 	if (data.event === 'error') {
@@ -87,7 +94,7 @@ if (reconnectToGameButton) {
 			const message = {
 				event: 'reconnect',
 				payload: {
-					playerId: playerId,
+					playerId: playerIdHost,
 					gameId: gameIdForReconnectInput.value,
 				},
 			};
@@ -110,6 +117,63 @@ if (closeConnectionButtonElem) {
 	closeConnectionButtonElem.onclick = () => {
 		wss.close();
 		wss.onclose = () => console.log(`Соединение закрыто`);
+	};
+}
+
+// Send updateSettings using current playerId/gameId
+if (updateSettingsBtn) {
+	updateSettingsBtn.onclick = () => {
+		if (!playerIdHost || !gameId) {
+			console.warn('playerId/gameId пустые. Сначала создайте или войдите в игру.');
+			return;
+		}
+
+		const settings: Record<string, unknown> = {};
+
+		// boardSize: 5-20
+		const sizeVal = boardSizeInput?.value.trim();
+		if (sizeVal) {
+			const parsed = Number(sizeVal);
+			settings.boardSize = parsed;
+			// if (!Number.isNaN(parsed) && parsed >= 5 && parsed <= 20) {
+			// 	settings.boardSize = parsed;
+			// } else {
+			// 	console.warn('boardSize вне диапазона (5-20); игнорируем');
+			// }
+		}
+
+		// firstPlayer: PLAYER_1 | PLAYER_2 | RANDOM
+		const fp = firstPlayerSelect?.value as string | undefined;
+		if (fp === 'PLAYER_1' || fp === 'PLAYER_2' || fp === 'RANDOM') {
+			settings.firstPlayer = fp;
+		}
+
+		// fleetConfig: JSON array of {type,size,count}
+		const fleetText = fleetConfigInput?.value.trim();
+		if (fleetText) {
+			try {
+				const arr = JSON.parse(fleetText);
+				if (Array.isArray(arr)) {
+					settings.fleetConfig = arr;
+				} else {
+					console.warn('fleetConfig должен быть JSON-массивом');
+				}
+			} catch {
+				console.warn('Некорректный JSON в fleetConfig; игнорируем');
+			}
+		}
+
+		const message = {
+			event: 'updateSettings',
+			payload: {
+				playerId: playerIdHost,
+				gameId: gameId,
+				settings,
+			},
+		};
+
+		wss.send(JSON.stringify(message));
+		console.log('отправили updateSettings на сервер:', message);
 	};
 }
 

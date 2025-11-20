@@ -1,11 +1,4 @@
-import type {
-	// 	CoordsDTO,
-	GameStatus,
-	// 	PlaceShipPayload,
-	// 	ShotResult,
-	// 	UnplaceShipPayload,
-	// 	UpdateSettingsPayload,
-} from '@sea-battle/shared';
+import type { GameStatus, UpdateSettingsDTO } from '@sea-battle/shared';
 
 import { IPlayer } from '../player/types';
 
@@ -17,8 +10,8 @@ export interface IGame {
 	getPlayers(): IPlayer[];
 	getPlayer(playerId: string): IPlayer | undefined;
 	getEnemyPlayer(myPlayerId: string): IPlayer | undefined;
-	// isHost(playerId: string): boolean;
-	// updateSettings(playerId: string, settings: UpdateSettingsPayload): void;
+	isHost(playerId: string): boolean;
+	updateSettings(playerId: string, settings: UpdateSettingsDTO): void;
 	// placeShip(playerId: string, placement: PlaceShipPayload): void;
 	// unplaceShip(playerId: string, payload: UnplaceShipPayload): void;
 	// playerReady(playerId: string): void;

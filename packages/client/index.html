@@ -65,6 +65,32 @@
 			<button id="reconnectToGame">Reconnect to game</button>
 		</div>
 
+		<!-- Simple Update Settings form (no styles) -->
+		<div>
+			<h3>Update Settings</h3>
+			<label>
+				Board size (5-20):
+				<input id="boardSizeInput" type="number" min="5" max="20" />
+			</label>
+			<br />
+			<label>
+				First player:
+				<select id="firstPlayerSelect">
+					<option value="">-- no change --</option>
+					<option value="PLAYER_1">PLAYER_1</option>
+					<option value="PLAYER_2">PLAYER_2</option>
+					<option value="RANDOM">RANDOM</option>
+				</select>
+			</label>
+			<br />
+			<label>
+				Fleet config (JSON array of {type,size,count}):
+				<textarea id="fleetConfigInput" rows="4" cols="40"></textarea>
+			</label>
+			<br />
+			<button id="updateSettingsBtn">Update settings</button>
+		</div>
+
 		<table id="gameBoard" style="border-collapse: collapse; margin-top: 20px">
 			<tbody>
 				<tr>

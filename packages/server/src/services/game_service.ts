@@ -1,5 +1,7 @@
 import { randomUUID } from 'crypto';
 
+import { UpdateSettingsDTO } from '@sea-battle/shared';
+
 import { Game } from '../core/game/game';
 import type { IGame } from '../core/game/types';
 import { gameRepository } from '../data/game.repository';
@@ -51,12 +53,15 @@ class GameService implements IGameService {
 		return [true, foundGame];
 	}
 
-	// public updateSettings(
-	// 	playerId: string,
-	// 	payload: UpdateSettingsPayload
-	// ): GameStateUpdatePayload {
-	// 	throw new Error('Method not implemented.');
-	// }
+	// there is playerId - the one who wants to update settings
+	public updateSettings(playerId: string, gameId: string, settings: UpdateSettingsDTO): IGame {
+		const foundGame = this.repository.findById(gameId);
+		if (!foundGame) throw new Error(`Game with ID ${gameId} not found.`);
+
+		foundGame.updateSettings(playerId, settings);
+
+		return foundGame;
+	}
 
 	// public placeShip(playerId: string, payload: PlaceShipPayload): GameStateUpdatePayload {
 	// 	throw new Error('Method not implemented.');
