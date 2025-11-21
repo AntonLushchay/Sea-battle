@@ -6,6 +6,7 @@ export interface IGame {
 	gameId: string;
 	status: GameStatus;
 	currentPlayerId: string | null;
+	hostPlayerId: string | null;
 	addPlayer(playerId: string): void;
 	getPlayers(): IPlayer[];
 	getPlayer(playerId: string): IPlayer | undefined;

@@ -1,4 +1,4 @@
-import { UpdateSettingsDTO } from '@sea-battle/shared';
+import { FleetPlacementPayloadDTO, UpdateSettingsDTO } from '@sea-battle/shared';
 import type { WebSocket } from 'ws';
 
 import { IGame } from '../core/game/types';
@@ -95,16 +95,7 @@ class WebSocketGateway implements IWebSocketGateway {
 		}
 	}
 
-	// public handlePlaceShip(socket: WebSocket, payload: PlaceShipPayload): GameStateUpdatePayload {
-	// 	throw new Error('Method not implemented.');
-	// }
-
-	// public handleUnplaceShip(
-	// 	socket: WebSocket,
-	// 	payload: UnplaceShipPayload
-	// ): GameStateUpdatePayload {
-	// 	throw new Error('Method not implemented.');
-	// }
+	public handlePlaceFleet(_payload: FleetPlacementPayloadDTO[]): void {}
 
 	// public handlePlayerReady(socket: WebSocket): GameStateUpdatePayload {
 	// 	throw new Error('Method not implemented.');

@@ -7,7 +7,7 @@ export class Ship implements IShip {
 	private readonly _type: string;
 	private readonly _size: number;
 	private _hits: number = 0;
-	private position: CoordsDTO[] = [];
+	private _occupiedCells: CoordsDTO[] = [];
 
 	constructor(baseInfo: ShipBaseDTO) {
 		this._id = baseInfo.id;
@@ -35,25 +35,25 @@ export class Ship implements IShip {
 		return this._hits;
 	}
 
+	public set occupiedCells(value: CoordsDTO[]) {
+		this._occupiedCells = value;
+	}
+
+	public get occupiedCells(): CoordsDTO[] {
+		return this._occupiedCells;
+	}
+
 	public isSunk(): boolean {
 		return this.hits >= this.size;
 	}
 
 	public isPlaced(): boolean {
-		return this.position.length > 0;
-	}
-
-	public getPosition(): CoordsDTO[] {
-		return this.position;
+		return this._occupiedCells.length > 0;
 	}
 
 	public recordHit(): void {
 		if (this.hits < this.size) {
 			this.hits++;
 		}
-	}
-
-	public setPosition(coords: CoordsDTO[]): void {
-		this.position = coords;
 	}
 }

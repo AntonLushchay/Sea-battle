@@ -22,6 +22,7 @@ class GameService implements IGameService {
 
 		const newGame: IGame = new Game(gameId);
 		newGame.addPlayer(playerId);
+		newGame.hostPlayerId = playerId;
 
 		this.repository.save(newGame);
 		return newGame;

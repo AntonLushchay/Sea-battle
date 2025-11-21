@@ -4,9 +4,9 @@
 
 export type CellStatus = 'EMPTY' | 'SHIP' | 'HIT' | 'MISS';
 
-export type TurnOrder = 'PLAYER_1' | 'PLAYER_2' | 'RANDOM';
-
 export type GameStatus = 'SETUP' | 'IN_PROGRESS' | 'FINISHED';
+
+export type TurnOrder = 'PLAYER_1' | 'PLAYER_2' | 'RANDOM';
 
 export type ShotResult = 'HIT' | 'MISS' | 'SUNK';
 
@@ -15,10 +15,6 @@ export type Orientation = 'horizontal' | 'vertical';
 // =====================================================================================
 // |                                        DTOs                                         |
 // =====================================================================================
-
-export interface SomeIdDTO {
-	id: string;
-}
 
 export interface ReconnectPayloadDTO {
 	playerId: string;
@@ -35,6 +31,18 @@ export interface UpdateSettingsDTO {
 	boardSize: number;
 	fleetConfig: FleetRuleDTO[];
 	firstPlayer: TurnOrder;
+}
+
+export interface FleetPlacementPayloadDTO {
+	playerId: string;
+	gameId: string;
+	shipId: string;
+	coords: CoordsDTO[];
+	orientation: Orientation;
+}
+
+export interface SomeIdDTO {
+	id: string;
 }
 
 export interface PlayerInfoDTO {
@@ -62,12 +70,6 @@ export interface ShipBaseDTO {
 	id: string;
 	type: string;
 	size: number;
-}
-
-export interface ShipPlacementDTO {
-	baseInfo: ShipBaseDTO;
-	coords: CoordsDTO[];
-	orientation: Orientation;
 }
 
 export interface CellDTO {
@@ -120,14 +122,9 @@ export interface UpdateSettingsMessage {
 	payload: UpdateSettingsPayloadDTO;
 }
 
-export interface PlaceShipMessage {
-	event: 'placeShip';
-	payload: ShipPlacementDTO;
-}
-
-export interface UnplaceShipMessage {
-	event: 'unplaceShip';
-	payload: SomeIdDTO;
+export interface PlaceFleetMessage {
+	event: 'placeFleet';
+	payload: FleetPlacementPayloadDTO[];
 }
 
 export interface PlayerReadyMessage {

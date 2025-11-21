@@ -1,4 +1,4 @@
-import { UpdateSettingsDTO } from '@sea-battle/shared';
+import { FleetPlacementPayloadDTO, UpdateSettingsDTO } from '@sea-battle/shared';
 import type { WebSocket } from 'ws';
 
 export interface IWebSocketGateway {
@@ -6,8 +6,7 @@ export interface IWebSocketGateway {
 	handleJoinGame(socket: WebSocket, gameId: string): void;
 	handleReconnect(socket: WebSocket, playerId: string, gameId: string): void;
 	handleUpdateSettings(playerId: string, gameId: string, settings: UpdateSettingsDTO): void;
-	// handlePlaceShip(socket: WebSocket, payload: PlaceShipPayload): GameStateUpdatePayload;
-	// handleUnplaceShip(socket: WebSocket, payload: UnplaceShipPayload): GameStateUpdatePayload;
+	handlePlaceFleet(payload: FleetPlacementPayloadDTO[]): void;
 	// handlePlayerReady(socket: WebSocket): GameStateUpdatePayload;
 	// handleMakeTurn(socket: WebSocket, payload: MakeTurnPayload): TurnResultPayload;
 	// handleSurrender(socket: WebSocket): GameStateUpdatePayload;

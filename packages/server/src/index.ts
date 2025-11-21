@@ -5,6 +5,7 @@ import {
 	isCreateGameMessage,
 	isJoinToGameMessage,
 	isObjectWithEvent,
+	isPlaceFleetMessage,
 	isReconnectMessage,
 	isUpdateSettingsMessage,
 } from './utils/type_guards/type_guards';
@@ -67,6 +68,15 @@ wss.on('connection', (ws) => {
 						data.payload.gameId,
 						data.payload.settings
 					);
+					break;
+
+				case 'placeFleet':
+					if (!isPlaceFleetMessage(data)) {
+						throw new Error(
+							'Invalid placeFleet message: payload must contain playerId, gameId and fleet'
+						);
+					}
+					webSocketGateway.handlePlaceFleet(data.payload);
 					break;
 
 				default:

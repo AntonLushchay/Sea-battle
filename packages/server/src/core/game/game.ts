@@ -11,6 +11,7 @@ export class Game implements IGame {
 	private readonly _gameId: string;
 	private _status: GameStatus = 'SETUP';
 	private _currentPlayerId: string | null = null;
+	private _hostPlayerId: string | null = null;
 	private players: IPlayer[] = [];
 
 	constructor(gameId: string) {
@@ -37,6 +38,14 @@ export class Game implements IGame {
 		return this._currentPlayerId;
 	}
 
+	public set hostPlayerId(value: string | null) {
+		this._hostPlayerId = value;
+	}
+
+	public get hostPlayerId(): string | null {
+		return this._hostPlayerId;
+	}
+
 	public getPlayers(): IPlayer[] {
 		return this.players;
 	}
@@ -58,9 +67,10 @@ export class Game implements IGame {
 	}
 
 	public isHost(playerId: string): boolean {
-		return this.players[0]?.playerId === playerId;
+		return this._hostPlayerId === playerId;
 	}
 
+	// there is playerId - the one who wants to update settings
 	public updateSettings(playerId: string, settings: UpdateSettingsDTO): void {
 		if (!this.isHost(playerId)) throw new Error('Only the host can change settings.');
 		if (this.status !== 'SETUP') throw new Error('Can only update settings during setup.');
@@ -69,18 +79,24 @@ export class Game implements IGame {
 		}
 
 		this.players.forEach((player) => {
-			player.rebuildBoard(settings.boardSize);
-			player.rebuildFleet(settings.fleetConfig);
+			if (settings.boardSize) player.rebuildBoard(settings.boardSize);
+			if (settings.fleetConfig) player.rebuildFleet(settings.fleetConfig);
+			player.isReady = false;
 		});
+
+		const players = this.getPlayers();
+		if (settings.firstPlayer === 'RANDOM') {
+			// eslint-disable-next-line sonarjs/pseudo-random
+			const randomIndex = Math.floor(Math.random() * MAX_PLAYERS);
+			this.currentPlayerId = players[randomIndex]?.playerId ?? null;
+		} else if (settings.firstPlayer === 'PLAYER_1') {
+			this.currentPlayerId = players[0]?.playerId ?? null;
+		} else if (settings.firstPlayer === 'PLAYER_2') {
+			this.currentPlayerId = players[1]?.playerId ?? null;
+		}
 	}
 
-	// public placeShip(playerId: string, placement: PlaceShipPayload): void {
-	// 	this.getPlayer(playerId)?.placeShip(placement);
-	// }
-
-	// public unplaceShip(playerId: string, payload: UnplaceShipPayload): void {
-	// 	this.getPlayer(playerId)?.unplaceShip(payload);
-	// }
+	public placeFleet(): void {}
 
 	// public playerReady(playerId: string): void {
 	// 	const player = this.getPlayer(playerId);
