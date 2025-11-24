@@ -168,7 +168,7 @@ export interface ReconnectedMessage {
 	payload: GameStateDTO;
 }
 
-export interface GameStateUpdateMessage {
+export interface GameStateUpdatedMessage {
 	event: 'updatedGameState';
 	payload: GameStateDTO;
 }

@@ -1,4 +1,11 @@
-import { ShipPlacementDTO, UpdateSettingsDTO } from '@sea-battle/shared';
+import {
+	GameCreatedMessage,
+	GameJoinedMessage,
+	GameStateUpdatedMessage,
+	ReconnectedMessage,
+	ShipPlacementDTO,
+	UpdateSettingsDTO,
+} from '@sea-battle/shared';
 import type { WebSocket } from 'ws';
 
 import { IGame } from '../core/game/types';
@@ -30,12 +37,11 @@ class WebSocketGateway implements IWebSocketGateway {
 
 			this.clients.set(player1.playerId, socket);
 
-			socket.send(
-				JSON.stringify({
-					event: 'gameCreated',
-					payload: mapToGameStateDTO(createdGame, player1.playerId),
-				})
-			);
+			const gameCreatedMessage: GameCreatedMessage = {
+				event: 'gameCreated',
+				payload: mapToGameStateDTO(createdGame, player1.playerId),
+			};
+			socket.send(JSON.stringify(gameCreatedMessage));
 		}
 	}
 
@@ -49,12 +55,11 @@ class WebSocketGateway implements IWebSocketGateway {
 		this.clients.set(player2.playerId, socket);
 
 		for (const player of [player1, player2]) {
-			this.clients.get(player.playerId)?.send(
-				JSON.stringify({
-					event: 'gameJoined',
-					payload: mapToGameStateDTO(updatedGame, player.playerId),
-				})
-			);
+			const gameJoinedMessage: GameJoinedMessage = {
+				event: 'gameJoined',
+				payload: mapToGameStateDTO(updatedGame, player.playerId),
+			};
+			this.clients.get(player.playerId)?.send(JSON.stringify(gameJoinedMessage));
 		}
 	}
 
@@ -70,12 +75,11 @@ class WebSocketGateway implements IWebSocketGateway {
 
 		this.clients.set(playerId, socket);
 
-		socket.send(
-			JSON.stringify({
-				event: 'reconnected',
-				payload: mapToGameStateDTO(actualGameState, playerId),
-			})
-		);
+		const gameReconnectedMessage: ReconnectedMessage = {
+			event: 'reconnected',
+			payload: mapToGameStateDTO(actualGameState, playerId),
+		};
+		socket.send(JSON.stringify(gameReconnectedMessage));
 	}
 
 	public handleUpdateSettings(
@@ -86,12 +90,11 @@ class WebSocketGateway implements IWebSocketGateway {
 		const updatedGame = this.gameService.updateSettings(playerId, gameId, settings);
 
 		for (const player of updatedGame.getPlayers()) {
-			this.clients.get(player.playerId)?.send(
-				JSON.stringify({
-					event: 'updatedGameState',
-					payload: mapToGameStateDTO(updatedGame, player.playerId),
-				})
-			);
+			const updatedGameStateMessage: GameStateUpdatedMessage = {
+				event: 'updatedGameState',
+				payload: mapToGameStateDTO(updatedGame, player.playerId),
+			};
+			this.clients.get(player.playerId)?.send(JSON.stringify(updatedGameStateMessage));
 		}
 	}
 
@@ -101,12 +104,11 @@ class WebSocketGateway implements IWebSocketGateway {
 			throw new Error('Place fleet failed: Invalid gameId.');
 		}
 
-		this.clients.get(playerId)?.send(
-			JSON.stringify({
-				event: 'updatedGameState',
-				payload: mapToGameStateDTO(updatedGame, playerId),
-			})
-		);
+		const updatedGameStateMessage: GameStateUpdatedMessage = {
+			event: 'updatedGameState',
+			payload: mapToGameStateDTO(updatedGame, playerId),
+		};
+		this.clients.get(playerId)?.send(JSON.stringify(updatedGameStateMessage));
 	}
 
 	// public handlePlayerReady(socket: WebSocket): GameStateUpdatePayload {
