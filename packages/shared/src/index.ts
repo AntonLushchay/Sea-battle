@@ -36,9 +36,18 @@ export interface UpdateSettingsDTO {
 export interface FleetPlacementPayloadDTO {
 	playerId: string;
 	gameId: string;
+	fleet: ShipPlacementDTO[];
+}
+
+export interface ShipPlacementDTO {
 	shipId: string;
-	coords: CoordsDTO[];
+	startCoords: CoordsDTO;
 	orientation: Orientation;
+}
+
+export interface CoordsDTO {
+	x: number;
+	y: number;
 }
 
 export interface SomeIdDTO {
@@ -64,6 +73,7 @@ export interface ShipDTO {
 	hitsCount: number;
 	isSunk: boolean;
 	isPlaced: boolean;
+	coords: CoordsDTO[];
 }
 
 export interface ShipBaseDTO {
@@ -75,11 +85,6 @@ export interface ShipBaseDTO {
 export interface CellDTO {
 	coords: CoordsDTO;
 	status: CellStatus;
-}
-
-export interface CoordsDTO {
-	x: number;
-	y: number;
 }
 
 export interface TurnResultDTO {
@@ -124,7 +129,7 @@ export interface UpdateSettingsMessage {
 
 export interface PlaceFleetMessage {
 	event: 'placeFleet';
-	payload: FleetPlacementPayloadDTO[];
+	payload: FleetPlacementPayloadDTO;
 }
 
 export interface PlayerReadyMessage {

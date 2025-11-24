@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 
-import { UpdateSettingsDTO } from '@sea-battle/shared';
+import { ShipPlacementDTO, UpdateSettingsDTO } from '@sea-battle/shared';
 
 import { Game } from '../core/game/game';
 import type { IGame } from '../core/game/types';
@@ -60,6 +60,15 @@ class GameService implements IGameService {
 		if (!foundGame) throw new Error(`Game with ID ${gameId} not found.`);
 
 		foundGame.updateSettings(playerId, settings);
+
+		return foundGame;
+	}
+
+	public placeFleet(gameId: string, playerId: string, fleet: ShipPlacementDTO[]): IGame {
+		const foundGame = this.repository.findById(gameId);
+		if (!foundGame) throw new Error(`Game with ID ${gameId} not found.`);
+
+		foundGame.placeFleet(playerId, fleet);
 
 		return foundGame;
 	}

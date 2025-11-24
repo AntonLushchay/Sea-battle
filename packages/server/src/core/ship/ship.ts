@@ -35,11 +35,11 @@ export class Ship implements IShip {
 		return this._hits;
 	}
 
-	public set occupiedCells(value: CoordsDTO[]) {
+	public setOccupiedCells(value: CoordsDTO[]) {
 		this._occupiedCells = value;
 	}
 
-	public get occupiedCells(): CoordsDTO[] {
+	public getOccupiedCells(): CoordsDTO[] {
 		return this._occupiedCells;
 	}
 
@@ -48,7 +48,7 @@ export class Ship implements IShip {
 	}
 
 	public isPlaced(): boolean {
-		return this._occupiedCells.length > 0;
+		return this._occupiedCells.length === this.size;
 	}
 
 	public recordHit(): void {

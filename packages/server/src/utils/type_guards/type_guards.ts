@@ -12,6 +12,7 @@ import {
 	PlaceFleetMessage,
 	ReconnectMessage,
 	ReconnectPayloadDTO,
+	ShipPlacementDTO,
 	SomeIdDTO,
 	TurnOrder,
 	UpdateSettingsDTO,
@@ -60,11 +61,7 @@ export const isReconnectMessage = (obj: BaseMessage): obj is ReconnectMessage =>
 };
 
 const isReconnectPayloadDTO = (payload: unknown): payload is ReconnectPayloadDTO => {
-	return (
-		isValidObject(payload) &&
-		typeof (payload as { playerId?: unknown }).playerId === 'string' &&
-		typeof (payload as { gameId?: unknown }).gameId === 'string'
-	);
+	return isValidObject(payload) && isValidGameAndPlayerIds(payload);
 };
 
 // =====================================================================================
@@ -81,8 +78,7 @@ export const isUpdateSettingsMessage = (obj: BaseMessage): obj is UpdateSettings
 const isUpdateSettingsPayloadDTO = (payload: unknown): payload is UpdateSettingsPayloadDTO => {
 	return (
 		isValidObject(payload) &&
-		typeof (payload as { playerId?: unknown }).playerId === 'string' &&
-		typeof (payload as { gameId?: unknown }).gameId === 'string' &&
+		isValidGameAndPlayerIds(payload) &&
 		isUpdateSettingsDTO((payload as { settings?: unknown }).settings)
 	);
 };
@@ -126,30 +122,36 @@ export const isPlaceFleetMessage = (obj: BaseMessage): obj is PlaceFleetMessage 
 const isFleetPlacementPayloadDTO = (payload: unknown): payload is FleetPlacementPayloadDTO => {
 	return (
 		isValidObject(payload) &&
-		typeof (payload as { playerId?: unknown }).playerId === 'string' &&
-		typeof (payload as { gameId?: unknown }).gameId === 'string' &&
-		typeof (payload as { shipId?: unknown }).shipId === 'string' &&
-		isCoordsDTOArray((payload as { coords?: unknown }).coords) &&
-		isOrientation((payload as { orientation?: unknown }).orientation)
+		isValidGameAndPlayerIds(payload) &&
+		isShipPlacementDTOArray((payload as { fleet?: unknown }).fleet)
 	);
 };
 
-const isCoordsDTOArray = (coords: unknown): coords is Array<CoordsDTO> => {
+const isShipPlacementDTOArray = (fleet: unknown): fleet is Array<ShipPlacementDTO> => {
 	return (
-		Array.isArray(coords) &&
-		coords.every(
+		Array.isArray(fleet) &&
+		fleet.every(
 			(item) =>
 				isValidObject(item) &&
-				typeof (item as { x?: unknown }).x === 'number' &&
-				typeof (item as { y?: unknown }).y === 'number'
+				typeof (item as { shipId?: unknown }).shipId === 'string' &&
+				isCoordsDTO((item as { startCoords?: unknown }).startCoords) &&
+				isOrientation((item as { orientation?: unknown }).orientation)
 		)
+	);
+};
+
+const isCoordsDTO = (startCoords: unknown): startCoords is CoordsDTO => {
+	return (
+		isValidObject(startCoords) &&
+		typeof (startCoords as { x?: unknown }).x === 'number' &&
+		typeof (startCoords as { y?: unknown }).y === 'number'
 	);
 };
 
 const isOrientation = (orientation: unknown): orientation is Orientation => {
 	return (
 		typeof orientation === 'string' &&
-		(orientation === 'HORIZONTAL' || orientation === 'VERTICAL')
+		(orientation === 'horizontal' || orientation === 'vertical')
 	);
 };
 
@@ -159,4 +161,11 @@ const isOrientation = (orientation: unknown): orientation is Orientation => {
 
 const isValidObject = (obj: unknown): obj is Record<string, unknown> => {
 	return typeof obj === 'object' && obj !== null;
+};
+
+const isValidGameAndPlayerIds = (obj: unknown): obj is { playerId: string; gameId: string } => {
+	return (
+		typeof (obj as { playerId?: unknown }).playerId === 'string' &&
+		typeof (obj as { gameId?: unknown }).gameId === 'string'
+	);
 };

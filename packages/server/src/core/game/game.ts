@@ -1,4 +1,4 @@
-import type { GameStatus, UpdateSettingsDTO } from '@sea-battle/shared';
+import type { GameStatus, ShipPlacementDTO, UpdateSettingsDTO } from '@sea-battle/shared';
 
 import { Player } from '../player/player';
 import type { IPlayer } from '../player/types';
@@ -96,14 +96,17 @@ export class Game implements IGame {
 		}
 	}
 
-	public placeFleet(): void {}
+	public placeFleet(playerId: string, fleet: ShipPlacementDTO[]): void {
+		const player = this.getPlayer(playerId);
+		if (!player) throw new Error('Player not found.');
+
+		player.placeFleet(fleet);
+	}
 
 	// public playerReady(playerId: string): void {
 	// 	const player = this.getPlayer(playerId);
 	// 	if (!player) throw new Error('Player not found.');
-
 	// 	player.setReady(true);
-
 	// 	const allReady =
 	// 		this.players.length === MAX_PLAYERS && this.players.every((p) => p.isReady());
 	// 	if (allReady) {
@@ -115,18 +118,13 @@ export class Game implements IGame {
 	// public processTurn(playerId: ID, coords: CoordsDTO): ShotResult {
 	// 	if (this.status !== 'IN_PROGRESS') throw new Error('Game is not in progress.');
 	// 	if (playerId !== this.currentPlayerId) throw new Error("It's not your turn.");
-
 	// 	const opponent = this.players.find((p) => p.getId() !== playerId);
 	// 	if (!opponent) throw new Error('Opponent not found.');
-
 	// 	const result = opponent.receiveShot(coords);
-
 	// 	if (opponent.getFleet().areAllShipsSunk()) {
 	// 		this.status = 'FINISHED';
 	// 	} else {
-	// 		// TODO: Implement turn switching
 	// 	}
-
 	// 	return result;
 	// }
 }

@@ -36,7 +36,7 @@ export class Cell implements ICell {
 	// 		// Already shot here, no change
 	// 		return this.status === 'HIT' ? 'HIT' : 'MISS';
 	// 	}
-
+	//
 	// 	if (this.assignedShip) {
 	// 		this.status = 'HIT';
 	// 		this.assignedShip.recordHit();

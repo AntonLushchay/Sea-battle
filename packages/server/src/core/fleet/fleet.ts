@@ -1,4 +1,4 @@
-import { FleetRuleDTO } from '@sea-battle/shared';
+import { CoordsDTO, FleetRuleDTO } from '@sea-battle/shared';
 
 import { Ship } from '../ship/ship';
 import type { IShip } from '../ship/types';
@@ -34,5 +34,9 @@ export class Fleet implements IFleet {
 
 	public getFleet(): IShip[] {
 		return this.fleet;
+	}
+
+	public assignCellsToShip(ship: IShip, shipCoords: CoordsDTO[]): void {
+		ship.setOccupiedCells(shipCoords);
 	}
 }

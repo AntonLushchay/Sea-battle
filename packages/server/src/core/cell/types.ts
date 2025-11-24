@@ -1,7 +1,5 @@
 import { CellStatus, CoordsDTO } from '@sea-battle/shared';
 
-import { IShip } from '../ship/types';
-
 export interface ICell {
 	readonly coords: CoordsDTO;
 	status: CellStatus;

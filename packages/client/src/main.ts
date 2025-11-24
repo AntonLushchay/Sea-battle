@@ -23,6 +23,10 @@ const boardSizeInput = document.querySelector<HTMLInputElement>('#boardSizeInput
 const firstPlayerSelect = document.querySelector<HTMLSelectElement>('#firstPlayerSelect');
 const fleetConfigInput = document.querySelector<HTMLTextAreaElement>('#fleetConfigInput');
 const updateSettingsBtn = document.querySelector<HTMLButtonElement>('#updateSettingsBtn');
+// Elements for placeFleet
+const fleetPlacementInput = document.querySelector<HTMLTextAreaElement>('#fleetPlacementInput');
+const placeFleetPlayerSelect = document.querySelector<HTMLSelectElement>('#placeFleetPlayerSelect');
+const sendPlaceFleetBtn = document.querySelector<HTMLButtonElement>('#sendPlaceFleetBtn');
 
 wss.onopen = () => {
 	console.log(`Соединение с сервером установлено`);
@@ -174,6 +178,77 @@ if (updateSettingsBtn) {
 
 		wss.send(JSON.stringify(message));
 		console.log('отправили updateSettings на сервер:', message);
+	};
+}
+
+// Send placeFleet (fleet placement) using chosen player (host or guest)
+if (sendPlaceFleetBtn) {
+	sendPlaceFleetBtn.onclick = () => {
+		if (!gameId) {
+			console.warn('gameId пустой. Сначала создайте или войдите в игру.');
+			return;
+		}
+		const playerSelection = placeFleetPlayerSelect?.value || 'host';
+		const chosenPlayerId = playerSelection === 'guest' ? playerIdGuest : playerIdHost;
+		if (!chosenPlayerId) {
+			console.warn('Выбранный playerId пуст. Возможно игрок еще не создан/не присоединился.');
+			return;
+		}
+		const raw = fleetPlacementInput?.value.trim();
+		if (!raw) {
+			console.warn('Введите JSON для размещения флота.');
+			return;
+		}
+		let fleet: unknown;
+		try {
+			fleet = JSON.parse(raw);
+		} catch (e) {
+			console.warn('Некорректный JSON в поле fleet placements:', e);
+			return;
+		}
+		if (!Array.isArray(fleet)) {
+			console.warn('Fleet placements должен быть массивом.');
+			return;
+		}
+		// Быстрая валидация элементов
+		for (let i = 0; i < fleet.length; i++) {
+			const item = fleet[i];
+			if (typeof item !== 'object' || item === null) {
+				console.warn(`Элемент флота ${i} не объект`);
+				return;
+			}
+			const { shipId, startCoords, orientation } = item as {
+				shipId?: unknown;
+				startCoords?: { x?: unknown; y?: unknown };
+				orientation?: unknown;
+			};
+			if (typeof shipId !== 'string') {
+				console.warn(`shipId в элементе ${i} должен быть строкой`);
+				return;
+			}
+			if (
+				!startCoords ||
+				typeof startCoords.x !== 'number' ||
+				typeof startCoords.y !== 'number'
+			) {
+				console.warn(`startCoords в элементе ${i} должен иметь числовые x,y`);
+				return;
+			}
+			if (orientation !== 'horizontal' && orientation !== 'vertical') {
+				console.warn(`orientation в элементе ${i} должен быть 'horizontal' или 'vertical'`);
+				return;
+			}
+		}
+		const message = {
+			event: 'placeFleet',
+			payload: {
+				gameId,
+				playerId: chosenPlayerId,
+				fleet,
+			},
+		};
+		wss.send(JSON.stringify(message));
+		console.log('отправили placeFleet на сервер:', message);
 	};
 }
 

@@ -65,6 +65,7 @@ const mapToFleetDTO = (game: IGame, playerId: string): ShipDTO[] => {
 			hitsCount: ship.hits,
 			isSunk: ship.isSunk(),
 			isPlaced: ship.isPlaced(),
+			coords: ship.occupiedCells,
 		};
 	});
 };

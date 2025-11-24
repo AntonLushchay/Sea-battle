@@ -73,10 +73,14 @@ wss.on('connection', (ws) => {
 				case 'placeFleet':
 					if (!isPlaceFleetMessage(data)) {
 						throw new Error(
-							'Invalid placeFleet message: payload must contain playerId, gameId and fleet'
+							'Invalid placeFleet message: payload must contain playerId, gameId, shipId, coords, orientation'
 						);
 					}
-					webSocketGateway.handlePlaceFleet(data.payload);
+					webSocketGateway.handlePlaceFleet(
+						data.payload.gameId,
+						data.payload.playerId,
+						data.payload.fleet
+					);
 					break;
 
 				default:

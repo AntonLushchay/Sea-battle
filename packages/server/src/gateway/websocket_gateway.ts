@@ -1,4 +1,4 @@
-import { FleetPlacementPayloadDTO, UpdateSettingsDTO } from '@sea-battle/shared';
+import { ShipPlacementDTO, UpdateSettingsDTO } from '@sea-battle/shared';
 import type { WebSocket } from 'ws';
 
 import { IGame } from '../core/game/types';
@@ -95,7 +95,19 @@ class WebSocketGateway implements IWebSocketGateway {
 		}
 	}
 
-	public handlePlaceFleet(_payload: FleetPlacementPayloadDTO[]): void {}
+	public handlePlaceFleet(gameId: string, playerId: string, fleet: ShipPlacementDTO[]): void {
+		const updatedGame = this.gameService.placeFleet(gameId, playerId, fleet);
+		if (!updatedGame) {
+			throw new Error('Place fleet failed: Invalid gameId.');
+		}
+
+		this.clients.get(playerId)?.send(
+			JSON.stringify({
+				event: 'updatedGameState',
+				payload: mapToGameStateDTO(updatedGame, playerId),
+			})
+		);
+	}
 
 	// public handlePlayerReady(socket: WebSocket): GameStateUpdatePayload {
 	// 	throw new Error('Method not implemented.');

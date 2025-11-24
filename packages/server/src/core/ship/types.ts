@@ -5,7 +5,7 @@ export interface IShip {
 	type: string;
 	size: number;
 	hits: number;
-	occupiedCells: CoordsDTO[];
+	setOccupiedCells(cells: CoordsDTO[]): void;
 	isSunk(): boolean;
 	isPlaced(): boolean;
 	recordHit(): void;
