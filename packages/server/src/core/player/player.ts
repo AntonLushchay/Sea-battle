@@ -1,4 +1,4 @@
-import { CoordsDTO, FleetRuleDTO, ShipPlacementDTO } from '@sea-battle/shared';
+import { CoordsDTO, FleetRuleDTO, ShipPlacementDTO, ShotResult } from '@sea-battle/shared';
 
 import { Board } from '../board/board';
 import type { IBoard } from '../board/types';
@@ -14,6 +14,7 @@ export class Player implements IPlayer {
 	private fleet: IFleet;
 	private currentBoardSize: number | null = null;
 	private currentFleetConfig: FleetRuleDTO[] | null = null;
+	private _isConnected: boolean = true;
 
 	constructor(playerId: string) {
 		this._playerId = playerId;
@@ -25,12 +26,20 @@ export class Player implements IPlayer {
 		return this._playerId;
 	}
 
-	public set isReady(isReady: boolean) {
-		this._isReady = isReady;
+	public set isReady(value: boolean) {
+		this._isReady = value;
 	}
 
 	public get isReady(): boolean {
 		return this._isReady;
+	}
+
+	public set isConnected(value: boolean) {
+		this._isConnected = value;
+	}
+
+	public get isConnected(): boolean {
+		return this._isConnected;
 	}
 
 	public getBoard(): IBoard {
@@ -41,15 +50,15 @@ export class Player implements IPlayer {
 		return this.fleet;
 	}
 
-	public rebuildBoard(size: number): void {
+	public rebuildBoard(size?: number): void {
 		this.board = new Board(size);
-		this.currentBoardSize = size;
+		this.currentBoardSize = size ?? null;
 		console.log(`Player ${this.playerId} board rebuilt to size ${size}`);
 	}
 
-	public rebuildFleet(fleetConfig: FleetRuleDTO[]): void {
+	public rebuildFleet(fleetConfig?: FleetRuleDTO[]): void {
 		this.fleet = new Fleet(fleetConfig);
-		this.currentFleetConfig = fleetConfig;
+		this.currentFleetConfig = fleetConfig ?? null;
 		console.log(`Player ${this.playerId} fleet rebuilt with new configuration`);
 	}
 
@@ -57,7 +66,7 @@ export class Player implements IPlayer {
 		const copiedFleetSet = new Set(this.fleet.getFleet());
 
 		fleetPlacement.forEach((placement) => {
-			const ship = this.fleet.getShipById(placement.shipId);
+			const ship = this.getFleet().getShipById(placement.shipId);
 			if (!ship) {
 				this.errorOnPlacingFleet(`Ship with ID ${placement.shipId} not found in fleet.`);
 			} else if (ship.isPlaced()) {
@@ -89,9 +98,44 @@ export class Player implements IPlayer {
 		console.log(`Player ${this.playerId} has successfully placed their fleet.`);
 	}
 
+	public toggleReadyState(): void {
+		if (this.isReady) {
+			this.isReady = false;
+			return;
+		}
+		if (!this.fleet.areAllShipsPlaced()) {
+			throw new Error(`Player ${this.playerId} cannot be ready: not all ships are placed.`);
+		}
+		this.isReady = true;
+	}
+
+	public receiveShot(coords: CoordsDTO): ShotResult {
+		const shotResult = this.getBoard().processShot(coords);
+
+		if (shotResult.result === 'HIT' && shotResult.shipId) {
+			const fleet = this.getFleet();
+			fleet.processShot(shotResult.shipId);
+			if (fleet.isShipSunk(shotResult.shipId)) {
+				return 'SUNK';
+			}
+			return 'HIT';
+		}
+		return 'MISS';
+	}
+
+	public isFleetSunk(): boolean {
+		return this.getFleet().areAllShipsSunk();
+	}
+
+	public resetForNewGame(): void {
+		this.isReady = false;
+		this.rebuildBoard(...(this.currentBoardSize ? [this.currentBoardSize] : []));
+		this.rebuildFleet(...(this.currentFleetConfig ? [this.currentFleetConfig] : []));
+	}
+
 	private errorOnPlacingFleet(errorMessage: string): never {
-		if (this.currentBoardSize) this.rebuildBoard(this.currentBoardSize);
-		if (this.currentFleetConfig) this.rebuildFleet(this.currentFleetConfig);
+		this.rebuildBoard(...(this.currentBoardSize ? [this.currentBoardSize] : []));
+		this.rebuildFleet(...(this.currentFleetConfig ? [this.currentFleetConfig] : []));
 		throw new Error(`Error placing fleet for player ${this.playerId}: ${errorMessage}`);
 	}
 
@@ -106,12 +150,4 @@ export class Player implements IPlayer {
 		}
 		return shipCoords;
 	}
-
-	// public receiveShot(coords: CoordsDTO): ShotResult {
-	// 	const cell = this.board.getCell(coords.x, coords.y);
-	// 	if (!cell) {
-	// 		throw new Error('Shot out of bounds');
-	// 	}
-	// 	return cell.receiveShot();
-	// }
 }

@@ -7,6 +7,8 @@ const mapToPlayerInfoToDTO = (game: IGame): [PlayerInfoDTO, ...PlayerInfoDTO[]] 
 		return {
 			playerID: player.playerId,
 			isReady: player.isReady,
+			isHost: game.isHost(player.playerId),
+			isConnected: player.isConnected,
 		};
 	});
 
@@ -79,6 +81,8 @@ export const mapToGameStateDTO = (game: IGame, playerId: string): GameStateDTO =
 		enemyBoard: mapToEnemyBoardDTO(game, playerId),
 		myFleet: mapToFleetDTO(game, playerId),
 		currentPlayerId: game.currentPlayerId,
+		lastTurn: game.getLastTurn(),
 		gameStatus: game.status,
+		winner: game.winnerPlayerId,
 	};
 };

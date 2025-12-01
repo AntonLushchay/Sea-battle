@@ -3,12 +3,19 @@ import { WebSocketServer } from 'ws';
 import { webSocketGateway } from './gateway/websocket_gateway';
 import {
 	isCreateGameMessage,
+	isExitGameMessage,
 	isJoinToGameMessage,
+	isMakeTurnMessage,
 	isObjectWithEvent,
 	isPlaceFleetMessage,
+	isPlayerReadyMessage,
 	isReconnectMessage,
+	isResetGameMessage,
+	isStartGameMessage,
+	isSurrenderMessage,
 	isUpdateSettingsMessage,
 } from './utils/type_guards/type_guards';
+import { ErrorMessage } from '@sea-battle/shared';
 
 const wss = new WebSocketServer({ port: 8080 });
 
@@ -19,6 +26,7 @@ wss.on('connection', (ws) => {
 
 	ws.send(JSON.stringify({ event: 'connected', payload: 'Welcome to the Sea Battle server!' }));
 
+	// eslint-disable-next-line sonarjs/cognitive-complexity
 	ws.on('message', (message: string) => {
 		try {
 			const data: unknown = JSON.parse(message);
@@ -83,18 +91,92 @@ wss.on('connection', (ws) => {
 					);
 					break;
 
+				case 'playerReadyChange':
+					if (!isPlayerReadyMessage(data)) {
+						console.log('Invalid playerReady message payload:');
+						throw new Error(
+							'Invalid playerReady message: payload must contain playerId and gameId'
+						);
+					}
+					webSocketGateway.handlePlayerReadyChange(
+						data.payload.playerId,
+						data.payload.gameId
+					);
+					break;
+
+				case 'startGame':
+					if (!isStartGameMessage(data)) {
+						throw new Error(
+							'Invalid startGame message: payload must contain playerId and gameId'
+						);
+					}
+					webSocketGateway.handleStartGame(data.payload.playerId, data.payload.gameId);
+					break;
+
+				case 'makeTurn':
+					if (!isMakeTurnMessage(data)) {
+						throw new Error(
+							'Invalid makeTurn message: payload must contain playerId, gameId, x and y'
+						);
+					}
+
+					webSocketGateway.handleMakeTurn(
+						data.payload.playerId,
+						data.payload.gameId,
+						data.payload.coord
+					);
+					break;
+
+				case 'surrender':
+					if (!isSurrenderMessage(data)) {
+						throw new Error(
+							'Invalid surrender message: payload must contain playerId and gameId'
+						);
+					}
+					webSocketGateway.handleSurrender(data.payload.playerId, data.payload.gameId);
+					break;
+
+				case 'resetGame':
+					if (!isResetGameMessage(data)) {
+						throw new Error(
+							'Invalid resetGame message: payload must contain playerId and gameId'
+						);
+					}
+					webSocketGateway.handleResetGame(data.payload.playerId, data.payload.gameId);
+					break;
+
+				case 'exitGame':
+					if (!isExitGameMessage(data)) {
+						throw new Error(
+							'Invalid exitGame message: payload must contain playerId and gameId'
+						);
+					}
+
+					webSocketGateway.handleExitGame(data.payload.playerId, data.payload.gameId);
+					break;
+
 				default:
 					throw new Error(`Unknown event: ${data.event}`);
 			}
 		} catch (error) {
 			console.error('Error processing message:', error);
 
-			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-			ws.send(JSON.stringify({ event: 'error', payload: { message: errorMessage } }));
+			const errorMessageText = error instanceof Error ? error.message : 'Unknown error';
+			const errorMessage: ErrorMessage = {
+				event: 'error',
+				payload: errorMessageText,
+			};
+			ws.send(JSON.stringify(errorMessage));
 		}
 	});
 
-	ws.on('close', (code, reason) => {
-		console.log('Closed:', code, reason.toString());
+	ws.on('pong', () => {
+		webSocketGateway.handlePong(ws);
+	});
+
+	ws.on('close', (code) => {
+		console.log(`WebSocket closed. Code: ${code}`);
+
+		webSocketGateway.handleClientDisconnect(ws);
 	});
 });

@@ -1,7 +1,7 @@
 import { CoordsDTO } from '@sea-battle/shared';
 
 import { Cell } from '../cell/cell';
-import type { ICell } from '../cell/types';
+import type { CellShotResult, ICell } from '../cell/types';
 import { IShip } from '../ship/types';
 
 import { IBoard } from './types';
@@ -30,7 +30,7 @@ export class Board implements IBoard {
 	}
 
 	public getCell(x: number, y: number): ICell | undefined {
-		return this.grid[y]?.[x];
+		return this.getGrid()[y]?.[x];
 	}
 
 	public getGrid(): ICell[][] {
@@ -55,6 +55,16 @@ export class Board implements IBoard {
 			console.log('Validating coord:', coord);
 			return this.isCoordsOnBoard(coord.x, coord.y) && this.isValidCell(coord.x, coord.y);
 		});
+	}
+
+	public processShot(coords: CoordsDTO): CellShotResult {
+		const cell = this.getCell(coords.x, coords.y);
+		if (!cell) {
+			throw new Error('Shot out of bounds');
+		}
+
+		const shotResult = cell.receiveShot();
+		return shotResult;
 	}
 
 	private isCoordsOnBoard(x: number, y: number): boolean {

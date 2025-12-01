@@ -5,15 +5,27 @@
 import {
 	CoordsDTO,
 	CreateGameMessage,
+	ExitGameMessage,
+	ExitGamePayloadDTO,
 	FleetPlacementPayloadDTO,
 	FleetRuleDTO,
 	JoinGameMessage,
+	MakeTurnMessage,
+	MakeTurnPayloadDTO,
 	Orientation,
 	PlaceFleetMessage,
+	PlayerReadyMessage,
+	PlayerReadyPayloadDTO,
 	ReconnectMessage,
 	ReconnectPayloadDTO,
+	ResetGameMessage,
+	ResetGamePayloadDTO,
 	ShipPlacementDTO,
 	SomeIdDTO,
+	StartGameMessage,
+	StartGamePayloadDTO,
+	SurrenderMessage,
+	SurrenderPayloadDTO,
 	TurnOrder,
 	UpdateSettingsDTO,
 	UpdateSettingsMessage,
@@ -116,7 +128,9 @@ const isTurnOrder = (firstPlayer: unknown): firstPlayer is TurnOrder => {
 // |                        isPlaceFleetMessage Type Guards                            |
 // =====================================================================================
 export const isPlaceFleetMessage = (obj: BaseMessage): obj is PlaceFleetMessage => {
-	return obj.event === 'placeFleet' && isFleetPlacementPayloadDTO(obj.payload);
+	return (
+		isValidObject(obj) && obj.event === 'placeFleet' && isFleetPlacementPayloadDTO(obj.payload)
+	);
 };
 
 const isFleetPlacementPayloadDTO = (payload: unknown): payload is FleetPlacementPayloadDTO => {
@@ -153,6 +167,83 @@ const isOrientation = (orientation: unknown): orientation is Orientation => {
 		typeof orientation === 'string' &&
 		(orientation === 'horizontal' || orientation === 'vertical')
 	);
+};
+
+// =====================================================================================
+// |                             PlayerReadyMessage                                    |
+// =====================================================================================
+export const isPlayerReadyMessage = (obj: BaseMessage): obj is PlayerReadyMessage => {
+	return (
+		isValidObject(obj) &&
+		obj.event === 'playerReadyChange' &&
+		isPlayerReadyPayloadDTO(obj.payload)
+	);
+};
+
+const isPlayerReadyPayloadDTO = (payload: unknown): payload is PlayerReadyPayloadDTO => {
+	return isValidObject(payload) && isValidGameAndPlayerIds(payload);
+};
+
+// =====================================================================================
+// |                              StartGameMessage                                     |
+// =====================================================================================
+
+export const isStartGameMessage = (obj: BaseMessage): obj is StartGameMessage => {
+	return isValidObject(obj) && obj.event === 'startGame' && isStartGamePayloadDTO(obj.payload);
+};
+
+const isStartGamePayloadDTO = (payload: unknown): payload is StartGamePayloadDTO => {
+	return isValidObject(payload) && isValidGameAndPlayerIds(payload);
+};
+
+// =====================================================================================
+// |                              MakeTurnMessage                                      |
+// =====================================================================================
+export const isMakeTurnMessage = (obj: BaseMessage): obj is MakeTurnMessage => {
+	return (
+		isValidObject(obj) && obj.event === 'makeTurn' && isMakeTurnMessagePayloadDTO(obj.payload)
+	);
+};
+
+const isMakeTurnMessagePayloadDTO = (payload: unknown): payload is MakeTurnPayloadDTO => {
+	return (
+		isValidObject(payload) &&
+		isValidGameAndPlayerIds(payload) &&
+		isCoordsDTO((payload as { coord?: unknown }).coord)
+	);
+};
+
+// =====================================================================================
+// |                              SurrenderMessage                                     |
+// =====================================================================================
+export const isSurrenderMessage = (obj: BaseMessage): obj is SurrenderMessage => {
+	return isValidObject(obj) && obj.event === 'surrender' && isSurrenderPayloadDTO(obj.payload);
+};
+
+const isSurrenderPayloadDTO = (payload: unknown): payload is SurrenderPayloadDTO => {
+	return isValidObject(payload) && isValidGameAndPlayerIds(payload);
+};
+
+// =====================================================================================
+// |                              ResetGameMessage                                     |
+// =====================================================================================
+export const isResetGameMessage = (obj: BaseMessage): obj is ResetGameMessage => {
+	return isValidObject(obj) && obj.event === 'resetGame' && isResetGamePayloadDTO(obj.payload);
+};
+
+const isResetGamePayloadDTO = (payload: unknown): payload is ResetGamePayloadDTO => {
+	return isValidObject(payload) && isValidGameAndPlayerIds(payload);
+};
+
+// =====================================================================================
+// |                              ExitGameMessage                                     |
+// =====================================================================================
+export const isExitGameMessage = (obj: BaseMessage): obj is ExitGameMessage => {
+	return isValidObject(obj) && obj.event === 'exitGame' && isExitGamePayloadDTO(obj.payload);
+};
+
+const isExitGamePayloadDTO = (payload: unknown): payload is ExitGamePayloadDTO => {
+	return isValidObject(payload) && isValidGameAndPlayerIds(payload);
 };
 
 // =====================================================================================

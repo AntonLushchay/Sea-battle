@@ -9,8 +9,17 @@ class GameRepositoryImpl implements IGameRepository {
 		this.games.set(game.gameId, game);
 	}
 
-	public findById(gameId: string): IGame | undefined {
+	public findByGameId(gameId: string): IGame | undefined {
 		return this.games.get(gameId);
+	}
+
+	public findByPlayerId(playerId: string): IGame | undefined {
+		for (const game of this.games.values()) {
+			if (game.getPlayer(playerId)) {
+				return game;
+			}
+		}
+		return undefined;
 	}
 
 	public findAll(): IGame[] {

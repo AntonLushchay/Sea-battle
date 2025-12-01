@@ -27,6 +27,10 @@ const updateSettingsBtn = document.querySelector<HTMLButtonElement>('#updateSett
 const fleetPlacementInput = document.querySelector<HTMLTextAreaElement>('#fleetPlacementInput');
 const placeFleetPlayerSelect = document.querySelector<HTMLSelectElement>('#placeFleetPlayerSelect');
 const sendPlaceFleetBtn = document.querySelector<HTMLButtonElement>('#sendPlaceFleetBtn');
+// Ready + Start controls
+const readyPlayerSelect = document.querySelector<HTMLSelectElement>('#readyPlayerSelect');
+const toggleReadyBtn = document.querySelector<HTMLButtonElement>('#toggleReadyBtn');
+const startGameBtn = document.querySelector<HTMLButtonElement>('#startGameBtn');
 
 wss.onopen = () => {
 	console.log(`Соединение с сервером установлено`);
@@ -109,25 +113,10 @@ if (reconnectToGameButton) {
 	};
 }
 
-if (deleteGameButtonElem) {
-	deleteGameButtonElem.onclick = () => {
-		const message = {
-			event: 'deleteGame',
-		};
-		wss.send(JSON.stringify(message));
-	};
-}
-if (closeConnectionButtonElem) {
-	closeConnectionButtonElem.onclick = () => {
-		wss.close();
-		wss.onclose = () => console.log(`Соединение закрыто`);
-	};
-}
-
 // Send updateSettings using current playerId/gameId
 if (updateSettingsBtn) {
 	updateSettingsBtn.onclick = () => {
-		if (!playerIdHost || !gameId) {
+		if ((!playerIdHost || !playerIdGuest) && !gameId) {
 			console.warn('playerId/gameId пустые. Сначала создайте или войдите в игру.');
 			return;
 		}
@@ -188,8 +177,7 @@ if (sendPlaceFleetBtn) {
 			console.warn('gameId пустой. Сначала создайте или войдите в игру.');
 			return;
 		}
-		const playerSelection = placeFleetPlayerSelect?.value || 'host';
-		const chosenPlayerId = playerSelection === 'guest' ? playerIdGuest : playerIdHost;
+		const chosenPlayerId = playerIdGuest || playerIdHost;
 		if (!chosenPlayerId) {
 			console.warn('Выбранный playerId пуст. Возможно игрок еще не создан/не присоединился.');
 			return;
@@ -249,6 +237,65 @@ if (sendPlaceFleetBtn) {
 		};
 		wss.send(JSON.stringify(message));
 		console.log('отправили placeFleet на сервер:', message);
+	};
+}
+
+// Toggle player ready
+if (toggleReadyBtn) {
+	toggleReadyBtn.onclick = () => {
+		if (!gameId) {
+			console.warn('gameId пустой. Сначала создайте или войдите в игру.');
+			return;
+		}
+		const playerSelection = readyPlayerSelect?.value || 'host';
+		const chosenPlayerId = playerSelection === 'guest' ? playerIdGuest : playerIdHost;
+		if (!chosenPlayerId) {
+			console.warn('Выбранный playerId пуст. Возможно игрок еще не создан/не присоединился.');
+			return;
+		}
+		const message = {
+			event: 'playerReadyChange',
+			payload: {
+				playerId: chosenPlayerId,
+				gameId,
+			},
+		};
+		wss.send(JSON.stringify(message));
+		console.log('отправили playerReadyChange на сервер:', message);
+	};
+}
+
+// Start game (host only)
+if (startGameBtn) {
+	startGameBtn.onclick = () => {
+		if (!gameId || !playerIdHost) {
+			console.warn('Нужны gameId и host playerId. Сначала создайте игру.');
+			return;
+		}
+		const message = {
+			event: 'startGame',
+			payload: {
+				playerId: playerIdHost,
+				gameId,
+			},
+		};
+		wss.send(JSON.stringify(message));
+		console.log('отправили startGame на сервер:', message);
+	};
+}
+
+if (deleteGameButtonElem) {
+	deleteGameButtonElem.onclick = () => {
+		const message = {
+			event: 'deleteGame',
+		};
+		wss.send(JSON.stringify(message));
+	};
+}
+if (closeConnectionButtonElem) {
+	closeConnectionButtonElem.onclick = () => {
+		wss.close(1000, 'Клиент закрыл соединение');
+		wss.onclose = () => console.log(`Соединение закрыто`);
 	};
 }
 

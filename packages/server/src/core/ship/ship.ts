@@ -48,12 +48,14 @@ export class Ship implements IShip {
 	}
 
 	public isPlaced(): boolean {
-		return this._occupiedCells.length === this.size;
+		return this.occupiedCells.length === this.size;
 	}
 
 	public recordHit(): void {
 		if (this.hits < this.size) {
 			this.hits++;
+		} else {
+			throw new Error(`Cannot record hit: Ship ${this.id} is already sunk`);
 		}
 	}
 }

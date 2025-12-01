@@ -1,5 +1,5 @@
 // =====================================================================================
-// |                                     Enums & Types                                   |
+// |                                     Enums & Types                                 |
 // =====================================================================================
 
 export type CellStatus = 'EMPTY' | 'SHIP' | 'HIT' | 'MISS';
@@ -13,7 +13,7 @@ export type ShotResult = 'HIT' | 'MISS' | 'SUNK';
 export type Orientation = 'horizontal' | 'vertical';
 
 // =====================================================================================
-// |                                        DTOs                                         |
+// |                                        DTOs                                       |
 // =====================================================================================
 
 export interface ReconnectPayloadDTO {
@@ -27,22 +27,64 @@ export interface UpdateSettingsPayloadDTO {
 	settings: UpdateSettingsDTO;
 }
 
-export interface UpdateSettingsDTO {
-	boardSize: number;
-	fleetConfig: FleetRuleDTO[];
-	firstPlayer: TurnOrder;
-}
-
 export interface FleetPlacementPayloadDTO {
 	playerId: string;
 	gameId: string;
 	fleet: ShipPlacementDTO[];
 }
 
+export interface PlayerReadyPayloadDTO {
+	playerId: string;
+	gameId: string;
+}
+
+export interface StartGamePayloadDTO {
+	playerId: string;
+	gameId: string;
+}
+
 export interface ShipPlacementDTO {
 	shipId: string;
 	startCoords: CoordsDTO;
 	orientation: Orientation;
+}
+
+export interface UpdateSettingsDTO {
+	boardSize: number;
+	fleetConfig: FleetRuleDTO[];
+	firstPlayer: TurnOrder;
+}
+
+export interface MakeTurnPayloadDTO {
+	playerId: string;
+	gameId: string;
+	coord: CoordsDTO;
+}
+
+export interface LastTurnDTO {
+	playerId: string;
+	coords: CoordsDTO;
+	result: ShotResult;
+}
+
+export interface SurrenderPayloadDTO {
+	playerId: string;
+	gameId: string;
+}
+
+export interface ResetGamePayloadDTO {
+	playerId: string;
+	gameId: string;
+}
+
+export interface ExitGamePayloadDTO {
+	playerId: string;
+	gameId: string;
+}
+
+export interface PlayerDisconnectedPayloadDTO {
+	playerId: string;
+	gameState: GameStateDTO;
 }
 
 export interface CoordsDTO {
@@ -57,6 +99,8 @@ export interface SomeIdDTO {
 export interface PlayerInfoDTO {
 	playerID: string;
 	isReady: boolean;
+	isHost: boolean;
+	isConnected: boolean;
 }
 
 export interface BoardDTO {
@@ -87,12 +131,6 @@ export interface CellDTO {
 	status: CellStatus;
 }
 
-export interface TurnResultDTO {
-	coord: CoordsDTO;
-	result: ShotResult;
-	gameState: GameStateDTO;
-}
-
 export interface GameStateDTO {
 	gameId: string;
 	myPlayerId: string;
@@ -101,11 +139,13 @@ export interface GameStateDTO {
 	enemyBoard: BoardDTO | null;
 	myFleet: ShipDTO[];
 	currentPlayerId: string | null;
+	lastTurn: LastTurnDTO | null;
 	gameStatus: GameStatus;
+	winner: string | null;
 }
 
 // =====================================================================================
-// |                           Client to Server (C2S) Messages                           |
+// |                           Client to Server (C2S) Messages                         |
 // =====================================================================================
 
 export interface CreateGameMessage {
@@ -133,24 +173,37 @@ export interface PlaceFleetMessage {
 }
 
 export interface PlayerReadyMessage {
-	event: 'playerReady';
+	event: 'playerReadyChange';
+	payload: PlayerReadyPayloadDTO;
+}
+
+export interface StartGameMessage {
+	event: 'startGame';
+	payload: StartGamePayloadDTO;
 }
 
 export interface MakeTurnMessage {
 	event: 'makeTurn';
-	payload: CoordsDTO;
+	payload: MakeTurnPayloadDTO;
 }
 
 export interface SurrenderMessage {
 	event: 'surrender';
+	payload: SurrenderPayloadDTO;
 }
 
-export interface DestroyLobbyMessage {
-	event: 'destroyLobby';
+export interface ResetGameMessage {
+	event: 'resetGame';
+	payload: ResetGamePayloadDTO;
+}
+
+export interface ExitGameMessage {
+	event: 'exitGame';
+	payload: ExitGamePayloadDTO;
 }
 
 // =====================================================================================
-// |                           Server to Client (S2C) Messages                           |
+// |                           Server to Client (S2C) Messages                         |
 // =====================================================================================
 
 export interface GameCreatedMessage {
@@ -173,14 +226,14 @@ export interface GameStateUpdatedMessage {
 	payload: GameStateDTO;
 }
 
-export interface TurnResultMessage {
-	event: 'turnResult';
-	payload: TurnResultDTO;
-}
-
 export interface GameOverMessage {
 	event: 'gameOver';
 	payload: SomeIdDTO;
+}
+
+export interface PlayerDisconnectedMessage {
+	event: 'playerDisconnected';
+	payload: PlayerDisconnectedPayloadDTO;
 }
 
 export interface ErrorMessage {

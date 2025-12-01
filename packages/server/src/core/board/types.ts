@@ -1,6 +1,6 @@
 import { CoordsDTO } from '@sea-battle/shared';
 
-import type { ICell } from '../cell/types';
+import type { CellShotResult, ICell } from '../cell/types';
 import { IShip } from '../ship/types';
 
 export interface IBoard {
@@ -9,4 +9,5 @@ export interface IBoard {
 	getGrid(): ICell[][];
 	validateCoords(coords: CoordsDTO[]): boolean;
 	assignShipToCells(ship: IShip, coords: CoordsDTO[]): void;
+	processShot(coords: CoordsDTO): CellShotResult;
 }

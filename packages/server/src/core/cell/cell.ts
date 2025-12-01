@@ -1,6 +1,6 @@
 import type { CellStatus, CoordsDTO } from '@sea-battle/shared';
 
-import { ICell } from './types';
+import { CellShotResult, ICell } from './types';
 
 export class Cell implements ICell {
 	public readonly _coords: CoordsDTO;
@@ -31,19 +31,23 @@ export class Cell implements ICell {
 		return this._assignedShipId;
 	}
 
-	// public receiveShot(): ShotResult {
-	// 	if (this.status === 'HIT' || this.status === 'MISS') {
-	// 		// Already shot here, no change
-	// 		return this.status === 'HIT' ? 'HIT' : 'MISS';
-	// 	}
-	//
-	// 	if (this.assignedShip) {
-	// 		this.status = 'HIT';
-	// 		this.assignedShip.recordHit();
-	// 		return this.assignedShip.isSunk() ? 'SUNK' : 'HIT';
-	// 	} else {
-	// 		this.status = 'MISS';
-	// 		return 'MISS';
-	// 	}
-	// }
+	public receiveShot(): CellShotResult {
+		if (this.status === 'HIT' || this.status === 'MISS') {
+			throw new Error('Cell has already been shot at');
+		}
+
+		if (this.status === 'SHIP') {
+			this.status = 'HIT';
+			if (!this.assignedShipId) {
+				throw new Error('Cell with SHIP status has no assigned ship ID');
+			}
+			return { result: 'HIT', shipId: this.assignedShipId };
+		}
+		if (this.status === 'EMPTY') {
+			this.status = 'MISS';
+			return { result: 'MISS' };
+		}
+
+		throw new Error('Invalid cell status');
+	}
 }

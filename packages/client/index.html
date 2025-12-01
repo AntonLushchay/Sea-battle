@@ -114,6 +114,20 @@
 			</small>
 		</div>
 
+		<!-- Ready + Start Game (simple test controls) -->
+		<div style="margin-top: 16px">
+			<h3>Ready & Start</h3>
+			<label>
+				Player (host/guest):
+				<select id="readyPlayerSelect">
+					<option value="host">Host</option>
+					<option value="guest">Guest</option>
+				</select>
+			</label>
+			<button id="toggleReadyBtn">Toggle Ready</button>
+			<button id="startGameBtn">Start Game (host only)</button>
+		</div>
+
 		<table id="gameBoard" style="border-collapse: collapse; margin-top: 20px">
 			<tbody>
 				<tr>

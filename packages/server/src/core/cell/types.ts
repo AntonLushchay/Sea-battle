@@ -1,12 +1,13 @@
-import { CellStatus, CoordsDTO } from '@sea-battle/shared';
+import { CellStatus, CoordsDTO, ShotResult } from '@sea-battle/shared';
+
+export interface CellShotResult {
+	result: ShotResult;
+	shipId?: string;
+}
 
 export interface ICell {
 	readonly coords: CoordsDTO;
 	status: CellStatus;
 	assignedShipId: string | null;
-	// isOccupied(): boolean;
-	// Скорее всего я хочу хранить тут только ShipID, а не весь объект
-	// setShip(ship: IShip): void;
-	// clearShip(): void;
-	// receiveShot(): ShotResult;
+	receiveShot(): CellShotResult;
 }

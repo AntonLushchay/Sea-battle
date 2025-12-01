@@ -24,12 +24,25 @@ export class Fleet implements IFleet {
 		}
 	}
 
-	public getShipById(shipId: string): IShip | undefined {
-		return this.fleet.find((ship) => ship.id === shipId);
+	public getShipById(shipId: string): IShip {
+		const ship = this.fleet.find((ship) => ship.id === shipId);
+		if (!ship) {
+			throw new Error(`Ship with ID ${shipId} not found in fleet`);
+		}
+		return ship;
+	}
+
+	public isShipSunk(shipId: string): boolean {
+		const ship = this.getShipById(shipId);
+		return ship ? ship.isSunk() : false;
 	}
 
 	public areAllShipsSunk(): boolean {
 		return this.fleet.every((ship) => ship.isSunk());
+	}
+
+	public areAllShipsPlaced(): boolean {
+		return this.fleet.every((ship) => ship.isPlaced());
 	}
 
 	public getFleet(): IShip[] {
@@ -38,5 +51,12 @@ export class Fleet implements IFleet {
 
 	public assignCellsToShip(ship: IShip, shipCoords: CoordsDTO[]): void {
 		ship.setOccupiedCells(shipCoords);
+	}
+
+	public processShot(shipId: string): void {
+		const ship = this.getShipById(shipId);
+		if (ship) {
+			ship.recordHit();
+		}
 	}
 }
